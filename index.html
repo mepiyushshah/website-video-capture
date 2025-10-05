@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Video Capture Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fas fa-video"></i>
+                    <span>CaptureStudio</span>
+                </div>
+            </div>
+            
+            <div class="nav-center">
+                <button class="nav-btn active">
+                    <i class="fas fa-video"></i>
+                    <span>Video Player</span>
+                </button>
+                <button class="nav-btn">
+                    <i class="fas fa-eye"></i>
+                    <span>Preview</span>
+                </button>
+                <button class="nav-btn">
+                    <i class="fas fa-palette"></i>
+                    <span>Design</span>
+                </button>
+            </div>
+            
+            <div class="nav-right">
+                <div class="user-info">
+                    <span class="user-email">your@your.com</span>
+                    <span class="user-credits">99 credits</span>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recording Indicator -->
+        <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+            <div class="recording-pulse"></div>
+            <i class="fas fa-record-vinyl"></i>
+            <span>RECORDING</span>
+        </div>
+
+
+        <div class="main-content">
+            <!-- Left Sidebar Navigation -->
+            <div class="sidebar-nav">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <i class="fas fa-video"></i>
+                        <span>CaptureStudio</span>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-menu">
+                    <div class="menu-section">
+                        <div class="menu-item active" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <div class="menu-item" data-section="playground">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Playground</span>
+                        </div>
+                        <div class="menu-item" data-section="api-keys">
+                            <i class="fas fa-key"></i>
+                            <span>API Keys</span>
+                        </div>
+                        <div class="menu-item" data-section="history">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <!-- AI Assistant Panel -->
+                <div class="ai-panel">
+                    <div class="panel-header">
+                        <i class="fas fa-robot"></i>
+                        <span>AI ASSISTANT</span>
+                    </div>
+                    <div class="ai-content">
+                        <div class="ai-avatar">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI Assistant Ready</h3>
+                        <p>I can help you capture, edit, and enhance your website videos. Just describe what you need!</p>
+                        
+                        <div class="suggestions">
+                            <div class="suggestion">
+                                <i class="fas fa-video"></i>
+                                <span>Capture a new website</span>
+                            </div>
+                            <div class="suggestion">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit video settings</span>
+                            </div>
+                            <div class="suggestion">
+                                <i class="fas fa-magic"></i>
+                                <span>Add smooth transitions</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-input">
+                            <input type="text" placeholder="Ask your AI assistant...">
+                            <button><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects Panel -->
+                <div class="effects-panel">
+                    <div class="panel-header">
+                        <i class="fas fa-magic"></i>
+                        <span>EFFECTS</span>
+                    </div>
+                    <div class="effects-content">
+                        <div class="effect-category">
+                            <h4>Visual Effects</h4>
+                            <div class="effect-options">
+                                <div class="effect-option">
+                                    <input type="checkbox" id="fadeIn" checked>
+                                    <label for="fadeIn">Fade In</label>
+                                </div>
+                                <div class="effect-option">
+                                    <input type="checkbox" id="fadeOut" checked>
+                                    <label for="fadeOut">Fade Out</label>
+                                </div>
+                                <div class="effect-option">
+                                    <input type="checkbox" id="zoomEffect">
+                                    <label for="zoomEffect">Zoom</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="effect-category">
+                            <h4>Transitions</h4>
+                            <div class="effect-options">
+                                <div class="effect-option">
+                                    <input type="checkbox" id="smoothTransitions" checked>
+                                    <label for="smoothTransitions">Smooth</label>
+                                </div>
+                                <div class="effect-option">
+                                    <input type="checkbox" id="parallaxEffect">
+                                    <label for="parallaxEffect">Parallax</label>
+                        </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Panel -->
+                <div class="status-panel" id="statusPanel">
+                    <div class="status-item" id="readyStatus">
+                        <i class="fas fa-circle" style="color: #00aa00;"></i>
+                        <span>Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Settings Sidebar -->
+            <div class="settings-sidebar" id="settingsSidebar" style="display: none;">
+                <div class="settings-header">
+                    <h3>Video Settings</h3>
+                    <button class="close-btn" onclick="closeSettingsSidebar()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="settings-content">
+                    <div class="settings-tabs">
+                        <button class="tab-btn active" onclick="switchTab('capture')">
+                            <i class="fas fa-video"></i>
+                            <span>Capture Settings</span>
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('effects')">
+                            <i class="fas fa-magic"></i>
+                            <span>Effects & Transitions</span>
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('output')">
+                            <i class="fas fa-cog"></i>
+                            <span>Output Settings</span>
+                        </button>
+                    </div>
+
+                    <!-- Capture Settings Tab -->
+                    <div class="tab-content active" id="capture-tab">
+                        <div class="settings-section">
+                            <h4>Resolution & Quality</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="resolution">Resolution</label>
+                                    <select id="resolution">
+                                        <option value="1280x720">1280x720 (HD)</option>
+                                        <option value="1920x1080">1920x1080 (Full HD)</option>
+                                        <option value="2560x1440">2560x1440 (2K)</option>
+                                        <option value="3840x2160">3840x2160 (4K)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fps">Frame Rate</label>
+                                    <select id="fps">
+                                        <option value="24">24 FPS (Cinematic)</option>
+                                        <option value="30" selected>30 FPS (Standard)</option>
+                                        <option value="60">60 FPS (Smooth)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Scroll Behavior</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="scrollDuration">Scroll Duration (seconds)</label>
+                                    <input type="range" id="scrollDuration" min="5" max="30" value="10" oninput="updateScrollDuration()">
+                                    <span class="range-value" id="scrollDurationValue">10s</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scrollEasing">Scroll Easing</label>
+                                    <select id="scrollEasing">
+                                        <option value="linear">Linear</option>
+                                        <option value="ease-in-out" selected>Ease In-Out</option>
+                                        <option value="ease-in">Ease In</option>
+                                        <option value="ease-out">Ease Out</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Browser Settings</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="waitTime">Page Load Wait (seconds)</label>
+                                    <input type="range" id="waitTime" min="1" max="10" value="2" oninput="updateWaitTime()">
+                                    <span class="range-value" id="waitTimeValue">2s</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timeout">Timeout (seconds)</label>
+                                    <input type="range" id="timeout" min="10" max="120" value="30" oninput="updateTimeout()">
+                                    <span class="range-value" id="timeoutValue">30s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Effects & Transitions Tab -->
+                    <div class="tab-content" id="effects-tab">
+                        <div class="settings-section">
+                            <h4>Visual Effects</h4>
+                            <div class="effects-grid">
+                                <div class="effect-item">
+                                    <input type="checkbox" id="fadeIn" checked>
+                                    <label for="fadeIn">
+                                        <i class="fas fa-sun"></i>
+                                        <span>Fade In Effect</span>
+                                    </label>
+                                </div>
+                                <div class="effect-item">
+                                    <input type="checkbox" id="fadeOut" checked>
+                                    <label for="fadeOut">
+                                        <i class="fas fa-moon"></i>
+                                        <span>Fade Out Effect</span>
+                                    </label>
+                                </div>
+                                <div class="effect-item">
+                                    <input type="checkbox" id="zoomEffect">
+                                    <label for="zoomEffect">
+                                        <i class="fas fa-search-plus"></i>
+                                        <span>Zoom Effect</span>
+                                    </label>
+                                </div>
+                                <div class="effect-item">
+                                    <input type="checkbox" id="blurEffect">
+                                    <label for="blurEffect">
+                                        <i class="fas fa-eye-slash"></i>
+                                        <span>Blur Transitions</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Scroll Transitions</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="transitionType">Transition Type</label>
+                                    <select id="transitionType">
+                                        <option value="smooth" selected>Smooth Scroll</option>
+                                        <option value="step">Step by Step</option>
+                                        <option value="parallax">Parallax Effect</option>
+                                        <option value="wave">Wave Motion</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transitionSpeed">Transition Speed</label>
+                                    <select id="transitionSpeed">
+                                        <option value="slow">Slow & Elegant</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="fast">Fast & Dynamic</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Settings Tab -->
+                    <div class="tab-content" id="output-tab">
+                        <div class="settings-section">
+                            <h4>Video Encoding</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="codec">Video Codec</label>
+                                    <select id="codec">
+                                        <option value="h264" selected>H.264 (Compatible)</option>
+                                        <option value="h265">H.265 (Efficient)</option>
+                                        <option value="vp9">VP9 (Web Optimized)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bitrate">Bitrate (Mbps)</label>
+                                    <input type="range" id="bitrate" min="1" max="50" value="8" oninput="updateBitrate()">
+                                    <span class="range-value" id="bitrateValue">8 Mbps</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Audio Settings</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="audioEnabled">Include Audio</label>
+                                    <input type="checkbox" id="audioEnabled" checked>
+                                </div>
+                                <div class="form-group">
+                                    <label for="audioQuality">Audio Quality</label>
+                                    <select id="audioQuality">
+                                        <option value="low">Low (64 kbps)</option>
+                                        <option value="medium" selected>Medium (128 kbps)</option>
+                                        <option value="high">High (256 kbps)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-footer">
+                    <button class="btn secondary" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i>
+                        <span>Reset to Defaults</span>
+                    </button>
+                    <button class="btn secondary" onclick="closeSettingsSidebar()">Cancel</button>
+                    <button class="btn primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i>
+                        <span>Save Settings</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Video Player Area -->
+            <div class="video-container">
+                <div class="video-frame">
+                    <div class="video-header">
+                        <div class="video-title">
+                            <i class="fas fa-video"></i>
+                            <span>Website Capture</span>
+                        </div>
+                        <div class="video-controls">
+                            <button class="control-btn" id="playPauseBtn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="control-btn">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <button class="control-btn">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="video-wrapper">
+                        <video id="mainVideo" controls>
+                            <source src="captures/website-capture.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <!-- Video Overlay for when no video is loaded -->
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <div class="placeholder-content">
+                                <i class="fas fa-video"></i>
+                                <h3>No Video Loaded</h3>
+                                <p>Select a video from the explorer or capture a new one</p>
+                                <button class="capture-btn" onclick="startCapture()">
+                                    <span>Start Capture</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="video-info">
+                        <div class="info-item">
+                            <span class="label">Resolution:</span>
+                            <span class="value">1280x720</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">FPS:</span>
+                            <span class="value">30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Duration:</span>
+                            <span class="value" id="videoDuration">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capture Modal -->
+    <div class="modal" id="captureModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Capture New Website</h3>
+                <button class="close-btn" onclick="closeCaptureModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="websiteUrl">Website URL</label>
+                    <input type="url" id="websiteUrl" placeholder="https://example.com" value="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="outputName">Output Filename</label>
+                    <input type="text" id="outputName" placeholder="my-capture.mp4" value="website-capture.mp4">
+                </div>
+                <div class="form-group">
+                    <label>Capture Settings</label>
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <span>Resolution: 1280x720</span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Frame Rate: 30 FPS</span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Scroll Duration: 10s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeCaptureModal()">Cancel</button>
+                <button class="btn primary" onclick="startCaptureProcess()">
+                    <i class="fas fa-record-vinyl"></i>
+                    <span>Start Capture</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Video Settings</h3>
+                <button class="close-btn" onclick="closeSettingsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" onclick="switchTab('capture')">
+                        <i class="fas fa-video"></i>
+                        <span>Capture Settings</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('effects')">
+                        <i class="fas fa-magic"></i>
+                        <span>Effects & Transitions</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('output')">
+                        <i class="fas fa-cog"></i>
+                        <span>Output Settings</span>
+                    </button>
+                </div>
+
+                <!-- Capture Settings Tab -->
+                <div class="tab-content active" id="capture-tab">
+                    <div class="settings-section">
+                        <h4>Resolution & Quality</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="resolution">Resolution</label>
+                                <select id="resolution">
+                                    <option value="1280x720">1280x720 (HD)</option>
+                                    <option value="1920x1080">1920x1080 (Full HD)</option>
+                                    <option value="2560x1440">2560x1440 (2K)</option>
+                                    <option value="3840x2160">3840x2160 (4K)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fps">Frame Rate</label>
+                                <select id="fps">
+                                    <option value="24">24 FPS (Cinematic)</option>
+                                    <option value="30" selected>30 FPS (Standard)</option>
+                                    <option value="60">60 FPS (Smooth)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Scroll Behavior</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="scrollDuration">Scroll Duration (seconds)</label>
+                                <input type="range" id="scrollDuration" min="5" max="30" value="10" oninput="updateScrollDuration()">
+                                <span class="range-value" id="scrollDurationValue">10s</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="scrollEasing">Scroll Easing</label>
+                                <select id="scrollEasing">
+                                    <option value="linear">Linear</option>
+                                    <option value="ease-in-out" selected>Ease In-Out</option>
+                                    <option value="ease-in">Ease In</option>
+                                    <option value="ease-out">Ease Out</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Browser Settings</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="waitTime">Page Load Wait (seconds)</label>
+                                <input type="range" id="waitTime" min="1" max="10" value="2" oninput="updateWaitTime()">
+                                <span class="range-value" id="waitTimeValue">2s</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="timeout">Timeout (seconds)</label>
+                                <input type="range" id="timeout" min="10" max="120" value="30" oninput="updateTimeout()">
+                                <span class="range-value" id="timeoutValue">30s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects & Transitions Tab -->
+                <div class="tab-content" id="effects-tab">
+                    <div class="settings-section">
+                        <h4>Visual Effects</h4>
+                        <div class="effects-grid">
+                            <div class="effect-item">
+                                <input type="checkbox" id="fadeIn" checked>
+                                <label for="fadeIn">
+                                    <i class="fas fa-sun"></i>
+                                    <span>Fade In Effect</span>
+                                </label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" id="fadeOut" checked>
+                                <label for="fadeOut">
+                                    <i class="fas fa-moon"></i>
+                                    <span>Fade Out Effect</span>
+                                </label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" id="zoomEffect">
+                                <label for="zoomEffect">
+                                    <i class="fas fa-search-plus"></i>
+                                    <span>Zoom Effect</span>
+                                </label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" id="blurEffect">
+                                <label for="blurEffect">
+                                    <i class="fas fa-eye-slash"></i>
+                                    <span>Blur Transitions</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Scroll Transitions</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transitionType">Transition Type</label>
+                                <select id="transitionType">
+                                    <option value="smooth" selected>Smooth Scroll</option>
+                                    <option value="step">Step by Step</option>
+                                    <option value="parallax">Parallax Effect</option>
+                                    <option value="wave">Wave Motion</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transitionSpeed">Transition Speed</label>
+                                <select id="transitionSpeed">
+                                    <option value="slow">Slow & Elegant</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="fast">Fast & Dynamic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Advanced Effects</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="colorGrading">Color Grading</label>
+                                <select id="colorGrading">
+                                    <option value="none">None</option>
+                                    <option value="vintage">Vintage</option>
+                                    <option value="dramatic">Dramatic</option>
+                                    <option value="cinematic">Cinematic</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="stabilization">Video Stabilization</label>
+                                <select id="stabilization">
+                                    <option value="none">None</option>
+                                    <option value="light">Light</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="strong">Strong</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Settings Tab -->
+                <div class="tab-content" id="output-tab">
+                    <div class="settings-section">
+                        <h4>Video Encoding</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="codec">Video Codec</label>
+                                <select id="codec">
+                                    <option value="h264" selected>H.264 (Compatible)</option>
+                                    <option value="h265">H.265 (Efficient)</option>
+                                    <option value="vp9">VP9 (Web Optimized)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bitrate">Bitrate (Mbps)</label>
+                                <input type="range" id="bitrate" min="1" max="50" value="8" oninput="updateBitrate()">
+                                <span class="range-value" id="bitrateValue">8 Mbps</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Audio Settings</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="audioEnabled">Include Audio</label>
+                                <input type="checkbox" id="audioEnabled" checked>
+                            </div>
+                            <div class="form-group">
+                                <label for="audioQuality">Audio Quality</label>
+                                <select id="audioQuality">
+                                    <option value="low">Low (64 kbps)</option>
+                                    <option value="medium" selected>Medium (128 kbps)</option>
+                                    <option value="high">High (256 kbps)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>Output Options</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="autoSave">Auto-save to Captures</label>
+                                <input type="checkbox" id="autoSave" checked>
+                            </div>
+                            <div class="form-group">
+                                <label for="previewMode">Preview Mode</label>
+                                <input type="checkbox" id="previewMode">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i>
+                    <span>Reset to Defaults</span>
+                </button>
+                <button class="btn secondary" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i>
+                    <span>Save Settings</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
