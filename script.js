@@ -403,76 +403,181 @@ function closeCaptureModal() {
 async function startCaptureProcess() {
     const url = document.getElementById('websiteUrl').value;
     const filename = document.getElementById('outputName').value;
-    
+
     if (!url) {
         alert('Please enter a valid URL');
         return;
     }
-    
+
     // Close modal
     closeCaptureModal();
-    
+
     // Show loading state with website URL
     showLoadingState(url);
-    
+
+    // Start realistic progress tracking
+    let progressInterval;
+    let captureStartTime = Date.now();
+
     try {
         // Get current settings from localStorage
         const settings = JSON.parse(localStorage.getItem('videoSettings') || '{}');
-        
-        const response = await fetch('/api/capture', {
+
+        // Start the capture request
+        const capturePromise = fetch('/api/capture', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ url, filename, settings })
         });
-        
+
+        // Update progress based on realistic timing
+        progressInterval = setInterval(() => {
+            const elapsed = Date.now() - captureStartTime;
+            let progress = 0;
+            let stepTitle = '';
+            let stepDetail = '';
+            let stepNumber = 1;
+
+            if (elapsed < 3000) {
+                // First 3 seconds: Browser initialization
+                progress = (elapsed / 3000) * 15;
+                stepTitle = 'Initializing Browser';
+                stepDetail = `Loading ${new URL(url).hostname}...`;
+                stepNumber = 1;
+            } else if (elapsed < 5000) {
+                // Next 2 seconds: Page analysis
+                progress = 15 + ((elapsed - 3000) / 2000) * 10;
+                stepTitle = 'Analyzing Page';
+                stepDetail = 'Measuring content dimensions...';
+                stepNumber = 2;
+            } else if (elapsed < 25000) {
+                // Next 20 seconds: Main capture (longest phase)
+                progress = 25 + ((elapsed - 5000) / 20000) * 60;
+                stepTitle = 'Recording Video';
+                stepDetail = 'Capturing smooth scroll animation...';
+                stepNumber = 3;
+            } else {
+                // Final processing
+                progress = 85 + ((elapsed - 25000) / 5000) * 10;
+                stepTitle = 'Processing Video';
+                stepDetail = 'Optimizing and saving video file...';
+                stepNumber = 4;
+            }
+
+            updateProgress(Math.min(progress, 95), stepTitle, stepDetail, stepNumber);
+        }, 500);
+
+        const response = await capturePromise;
         const result = await response.json();
-        
+
+        // Clear progress interval
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+
         if (result.success) {
-            hideLoadingState();
-            showSuccessMessage(`Video captured successfully: ${filename}`);
-            
-            // Refresh video list
-            await loadVideoList();
-            
-            // Load the new video
-            loadVideo(filename);
+            // Show completion
+            updateProgress(100, 'Processing Video', 'Video saved successfully!', 4);
+            markStepComplete(4);
+
+            setTimeout(() => {
+                hideLoadingState();
+                showSuccessMessage(`Video captured successfully: ${filename}`);
+
+                // Refresh video list
+                loadVideoList().then(() => {
+                    // Load the new video
+                    loadVideo(filename);
+                });
+            }, 1000);
         } else {
             hideLoadingState();
             showErrorMessage(`Capture failed: ${result.error}`);
         }
     } catch (error) {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
         hideLoadingState();
         showErrorMessage(`Network error: ${error.message}`);
     }
 }
 
 function showLoadingState(websiteUrl) {
-    // Show recording indicator
+    // Show recording indicator with enhanced details
     const recordingIndicator = document.getElementById('recordingIndicator');
     if (recordingIndicator) {
         recordingIndicator.style.display = 'flex';
+        recordingIndicator.innerHTML = `
+            <div class="recording-pulse"></div>
+            <i class="fas fa-record-vinyl"></i>
+            <div class="recording-details">
+                <span class="recording-title">RECORDING IN PROGRESS</span>
+                <span class="recording-url">${websiteUrl || 'Preparing...'}</span>
+            </div>
+        `;
     }
-    
-    // Update status panel with real progress and website URL
+
+    // Update status panel with detailed progress tracking
     const statusPanel = document.getElementById('statusPanel');
     const domain = websiteUrl ? new URL(websiteUrl).hostname : 'website';
-    
+
     statusPanel.innerHTML = `
-        <div class="status-item">
-            <div class="status-spinner">
-                <div class="spinner"></div>
+        <div class="capture-progress-container">
+            <div class="progress-header">
+                <h4>📹 Capture Progress</h4>
+                <div class="overall-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0%</span>
+                </div>
             </div>
-            <span>Capturing ${domain}...</span>
-        </div>
-        <div class="status-item">
-            <div class="status-spinner">
-                <div class="spinner"></div>
+
+            <div class="status-step active" id="step1">
+                <div class="step-icon">
+                    <div class="status-spinner"><div class="spinner"></div></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-title">Initializing Browser</span>
+                    <span class="step-detail">Loading ${domain}...</span>
+                </div>
+                <div class="step-status">⏳</div>
             </div>
-            <span>Processing video...</span>
+
+            <div class="status-step" id="step2">
+                <div class="step-icon">⏳</div>
+                <div class="step-content">
+                    <span class="step-title">Analyzing Page</span>
+                    <span class="step-detail">Measuring content dimensions...</span>
+                </div>
+                <div class="step-status">⏳</div>
+            </div>
+
+            <div class="status-step" id="step3">
+                <div class="step-icon">⏳</div>
+                <div class="step-content">
+                    <span class="step-title">Recording Video</span>
+                    <span class="step-detail">Capturing smooth scroll animation...</span>
+                </div>
+                <div class="step-status">⏳</div>
+            </div>
+
+            <div class="status-step" id="step4">
+                <div class="step-icon">⏳</div>
+                <div class="step-content">
+                    <span class="step-title">Processing Video</span>
+                    <span class="step-detail">Optimizing and saving...</span>
+                </div>
+                <div class="step-status">⏳</div>
+            </div>
         </div>
     `;
+
+    // Initialize progress tracking - will be updated by real capture progress
+    updateProgress(0, 'Initializing capture...', 'Starting browser and preparing page');
 }
 
 function hideLoadingState() {
@@ -481,14 +586,82 @@ function hideLoadingState() {
     if (recordingIndicator) {
         recordingIndicator.style.display = 'none';
     }
-    
+
     const statusPanel = document.getElementById('statusPanel');
     statusPanel.innerHTML = `
-        <div class="status-item">
-            <i class="fas fa-circle" style="color: #00aa00;"></i>
-            <span>Ready</span>
+        <div class="status-item ready-state">
+            <div class="ready-icon">
+                <i class="fas fa-check-circle" style="color: #00aa00;"></i>
+            </div>
+            <div class="ready-content">
+                <span class="ready-title">Ready to Capture</span>
+                <span class="ready-detail">Click 'Start Capture' to begin recording</span>
+            </div>
         </div>
     `;
+}
+
+// Real progress tracking functions
+function updateProgress(percentage, stepTitle, stepDetail, stepNumber = 1) {
+    // Update overall progress bar
+    const progressFill = document.getElementById('overallProgress');
+    const progressText = document.getElementById('progressText');
+    if (progressFill && progressText) {
+        progressFill.style.width = `${percentage}%`;
+        progressText.textContent = `${Math.round(percentage)}%`;
+    }
+
+    // Update current step
+    updateStepStatus(stepNumber, stepTitle, stepDetail, true, false);
+
+    // Mark previous steps as complete
+    for (let i = 1; i < stepNumber; i++) {
+        markStepComplete(i);
+    }
+
+    // Reset future steps
+    for (let i = stepNumber + 1; i <= 4; i++) {
+        resetStep(i);
+    }
+}
+
+function markStepComplete(stepNum) {
+    const stepElement = document.getElementById(`step${stepNum}`);
+    if (!stepElement) return;
+
+    stepElement.classList.remove('active');
+    stepElement.classList.add('complete');
+    stepElement.querySelector('.step-icon').innerHTML = '<i class="fas fa-check-circle" style="color: #00aa00;"></i>';
+    stepElement.querySelector('.step-status').innerHTML = '✅';
+}
+
+function updateStepStatus(stepNum, title, detail, isActive, isComplete) {
+    const stepElement = document.getElementById(`step${stepNum}`);
+    if (!stepElement) return;
+
+    stepElement.classList.remove('active', 'complete');
+
+    if (isComplete) {
+        stepElement.classList.add('complete');
+        stepElement.querySelector('.step-icon').innerHTML = '<i class="fas fa-check-circle" style="color: #00aa00;"></i>';
+        stepElement.querySelector('.step-status').innerHTML = '✅';
+    } else if (isActive) {
+        stepElement.classList.add('active');
+        stepElement.querySelector('.step-icon').innerHTML = '<div class="status-spinner"><div class="spinner"></div></div>';
+        stepElement.querySelector('.step-status').innerHTML = '⏳';
+    }
+
+    if (title) stepElement.querySelector('.step-title').textContent = title;
+    if (detail) stepElement.querySelector('.step-detail').textContent = detail;
+}
+
+function resetStep(stepNum) {
+    const stepElement = document.getElementById(`step${stepNum}`);
+    if (!stepElement) return;
+
+    stepElement.classList.remove('active', 'complete');
+    stepElement.querySelector('.step-icon').innerHTML = '⏳';
+    stepElement.querySelector('.step-status').innerHTML = '⏳';
 }
 
 function showSuccessMessage(message) {

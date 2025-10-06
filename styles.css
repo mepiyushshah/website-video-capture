@@ -263,47 +263,209 @@ input::placeholder, textarea::placeholder {
 /* Recording Indicator */
 .recording-indicator {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #ff4444;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(220, 38, 127, 0.95);
     color: white;
-    padding: 12px 20px;
-    border: 2px solid #ff6666;
+    padding: 20px 30px;
+    border-radius: 25px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 14px;
+    gap: 15px;
     z-index: 1000;
+    font-weight: 600;
+    font-size: 1.1em;
+    backdrop-filter: blur(10px);
+    min-width: 350px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 .recording-pulse {
     width: 12px;
     height: 12px;
-    background: #ff4444;
+    background: #ff4757;
     border-radius: 50%;
     animation: recordingPulse 1s infinite;
+    flex-shrink: 0;
 }
 
 @keyframes recordingPulse {
-    0%, 100% { 
-        opacity: 1;
+    0%, 100% {
         transform: scale(1);
+        opacity: 1;
     }
-    50% { 
-        opacity: 0.3;
+    50% {
         transform: scale(1.2);
+        opacity: 0.7;
     }
 }
 
 .recording-indicator i {
-    font-size: 16px;
+    font-size: 1.2em;
     animation: recordingSpin 2s linear infinite;
+    flex-shrink: 0;
 }
 
 @keyframes recordingSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.recording-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.recording-title {
+    font-weight: 700;
+    font-size: 1em;
+}
+
+.recording-url {
+    font-size: 0.85em;
+    opacity: 0.9;
+    word-break: break-all;
+}
+
+/* Enhanced Status Panel Styles */
+.capture-progress-container {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.progress-header h4 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.overall-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    width: 120px;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #00ff88;
+    font-weight: 600;
+    font-size: 0.9em;
+    min-width: 35px;
+}
+
+.status-step {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #333;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.status-step:last-child {
+    border-bottom: none;
+}
+
+.status-step.active {
+    opacity: 1;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin: 0 -15px;
+}
+
+.status-step.complete {
+    opacity: 0.8;
+}
+
+.step-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.step-detail {
+    color: #999;
+    font-size: 0.85em;
+}
+
+.step-status {
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.ready-state {
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.ready-icon {
+    font-size: 1.5em;
+}
+
+.ready-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ready-title {
+    color: #00ff88;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.ready-detail {
+    color: #999;
+    font-size: 0.9em;
 }
 
 
