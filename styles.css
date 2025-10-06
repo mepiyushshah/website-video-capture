@@ -5,12 +5,59 @@
     box-sizing: border-box;
 }
 
+/* Force dark mode */
+html {
+    background: #0a0a0a;
+    color-scheme: dark;
+}
+
+/* Ensure all elements are dark themed */
+*, *::before, *::after {
+    background-color: inherit;
+    color: inherit;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #0a0a0a;
     height: 100vh;
     overflow: hidden;
     color: #ffffff;
+}
+
+/* Ensure all elements inherit dark theme */
+* {
+    color: inherit;
+}
+
+/* Dark mode overrides for any light elements */
+input, textarea, select {
+    background: #2d2d2d !important;
+    color: #ffffff !important;
+    border: 1px solid #404040 !important;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #a0a0a0 !important;
+}
+
+/* Dark scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555555;
 }
 
 .app-container {
@@ -233,7 +280,7 @@ body {
 .recording-pulse {
     width: 12px;
     height: 12px;
-    background: white;
+    background: #ff4444;
     border-radius: 50%;
     animation: recordingPulse 1s infinite;
 }
@@ -265,6 +312,69 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
+    margin-left: 560px; /* Account for both sidebar-nav (200px) + sidebar (360px) */
+}
+
+/* Left Sidebar Navigation */
+.sidebar-nav {
+    width: 200px;
+    background: #1e1e1e;
+    border-right: 1px solid #404040;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    height: calc(100vh - 60px);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid #404040;
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 8px 0;
+}
+
+.menu-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #a0a0a0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+    background: #2d2d2d;
+    color: #ffffff;
+}
+
+.menu-item.active {
+    background: #007acc;
+    color: #ffffff;
+    border-left-color: #ffffff;
+}
+
+.menu-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.menu-item span {
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* Left Sidebar */
@@ -275,7 +385,11 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    max-height: calc(100vh - 100px);
+    position: fixed;
+    top: 60px;
+    left: 200px; /* Position after sidebar-nav */
+    height: calc(100vh - 60px);
+    z-index: 1000;
 }
 
 .panel-header {
@@ -1172,6 +1286,78 @@ body {
     padding: 20px;
     background: #404040;
     border-top: 1px solid #505050;
+}
+
+/* Login Modal Specific Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-form label {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.login-form input {
+    padding: 12px 16px;
+    background: #2d2d2d;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: #007acc;
+    box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+}
+
+.login-form input::placeholder {
+    color: #a0a0a0;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #007acc;
+}
+
+.forgot-password {
+    color: #007acc;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+    color: #0099ff;
 }
 
 .btn {

@@ -5,6 +5,12 @@ let currentVideo = null;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing application...');
+    
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+        showLoginModal();
+    }
+    
     initializeVideoPlayer();
     setupEventListeners();
     loadVideoList();
@@ -105,6 +111,15 @@ function setupEventListeners() {
         tab.addEventListener('click', function() {
             const tabText = this.querySelector('span').textContent;
             handleNavTab(tabText);
+        });
+    });
+    
+    // Sidebar navigation
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            handleSidebarNavigation(section);
         });
     });
     
@@ -254,6 +269,53 @@ function handleNavTab(tabName) {
             showDesign();
             break;
     }
+}
+
+function handleSidebarNavigation(section) {
+    // Remove active class from all menu items
+    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+    
+    // Add active class to clicked menu item
+    const clickedItem = document.querySelector(`[data-section="${section}"]`);
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+    }
+    
+    // Handle section functionality
+    switch(section) {
+        case 'dashboard':
+            showDashboard();
+            break;
+        case 'playground':
+            showPlayground();
+            break;
+        case 'api-keys':
+            showApiKeys();
+            break;
+        case 'history':
+            showHistory();
+            break;
+    }
+}
+
+function showDashboard() {
+    console.log('Showing Dashboard');
+    // Dashboard functionality will be implemented here
+}
+
+function showPlayground() {
+    console.log('Showing Playground');
+    // Playground functionality will be implemented here
+}
+
+function showApiKeys() {
+    console.log('Showing API Keys');
+    // API Keys functionality will be implemented here
+}
+
+function showHistory() {
+    console.log('Showing History');
+    // History functionality will be implemented here
 }
 
 function showVideoPlayer() {
@@ -831,3 +893,87 @@ window.updateScrollDuration = updateScrollDuration;
 window.updateWaitTime = updateWaitTime;
 window.updateTimeout = updateTimeout;
 window.updateBitrate = updateBitrate;
+
+// Login System Functions
+function isLoggedIn() {
+    return localStorage.getItem('userLoggedIn') === 'true';
+}
+
+function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+}
+
+function closeLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+}
+
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    if (!email || !password) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+    }
+    
+    // Simple authentication (in real app, this would be server-side)
+    if (email === 'your@your.com' && password === 'password') {
+        // Set login status
+        localStorage.setItem('userLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        
+        if (rememberMe) {
+            localStorage.setItem('rememberUser', 'true');
+        }
+        
+        showMessage('Login successful! Welcome to CaptureStudio', 'success');
+        closeLoginModal();
+        
+        // Update user info in header
+        updateUserInfo(email);
+    } else {
+        showMessage('Invalid email or password', 'error');
+    }
+}
+
+function updateUserInfo(email) {
+    const userEmailElement = document.querySelector('.user-email');
+    if (userEmailElement) {
+        userEmailElement.textContent = email;
+    }
+}
+
+function logout() {
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('rememberUser');
+    
+    showMessage('Logged out successfully', 'info');
+    showLoginModal();
+}
+
+// Add logout functionality to logout button
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+});
+
+// Make functions globally available
+window.closeLoginModal = closeLoginModal;
+window.handleLogin = handleLogin;
+window.logout = logout;
