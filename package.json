@@ -4,8 +4,9 @@
   "description": "Capture website videos with smooth scrolling using Playwright",
   "main": "capture.js",
   "scripts": {
-    "start": "node capture.js",
-    "serve": "python3 -m http.server 3000"
+    "start": "node server.js",
+    "serve": "python3 -m http.server 3000",
+    "capture": "node capture.js"
   },
   "dependencies": {
     "playwright": "^1.40.0",
