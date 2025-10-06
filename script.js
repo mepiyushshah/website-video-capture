@@ -1274,8 +1274,8 @@ function initializeVideoEditor() {
         paddingSlider.addEventListener('input', (e) => {
             const value = e.target.value;
             paddingValue.textContent = value;
-            if (videoPlayer) {
-                videoPlayer.style.padding = `${value}px`;
+            if (videoWrapper) {
+                videoWrapper.style.padding = `${value}px`;
             }
         });
     }
@@ -1318,12 +1318,12 @@ function applySolidBackground() {
 function resetPadding() {
     const paddingSlider = document.getElementById('paddingSlider');
     const paddingValue = document.getElementById('paddingValue');
-    const mainVideo = document.getElementById('mainVideo');
+    const videoWrapper = document.getElementById('videoWrapper');
 
-    if (paddingSlider && paddingValue && mainVideo) {
+    if (paddingSlider && paddingValue && videoWrapper) {
         paddingSlider.value = 40;
         paddingValue.textContent = '40';
-        mainVideo.style.padding = '40px';
+        videoWrapper.style.padding = '40px';
     }
 }
 
