@@ -146,20 +146,7 @@
                         <div class="bg-section" id="colorSection">
                             <label class="section-label">Background Color</label>
                             <div class="color-input-group">
-                                <input type="color" id="bgColor" value="#1a1a1a">
-                                <span class="color-code">#1a1a1a</span>
-                            </div>
-
-                            <label class="section-label">Color Presets</label>
-                            <div class="color-presets">
-                                <button class="color-preset" style="background: #1a1a1a;"></button>
-                                <button class="color-preset" style="background: #ffffff;"></button>
-                                <button class="color-preset" style="background: #7209b7;"></button>
-                                <button class="color-preset" style="background: #4361ee;"></button>
-                                <button class="color-preset" style="background: #06ffa5;"></button>
-                                <button class="color-preset" style="background: #ffd60a;"></button>
-                                <button class="color-preset" style="background: #ff006e;"></button>
-                                <button class="color-preset" style="background: #fb5607;"></button>
+                                <input type="text" id="bgColorInput" value="#1a1a1a" placeholder="#000000 or rgb(0,0,0)">
                             </div>
                         </div>
 
@@ -471,7 +458,7 @@
                 </div>
                 <div class="form-group">
                     <label for="outputName">Output Filename</label>
-                    <input type="text" id="outputName" placeholder="my-capture.mp4" value="website-capture.mp4">
+                    <input type="text" id="outputName" placeholder="my-capture.mp4">
                 </div>
                 <div class="form-group">
                     <label>Capture Settings</label>

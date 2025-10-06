@@ -63,7 +63,7 @@ class WebsiteVideoCapture {
   async captureWebsite(url, outputFilename = 'website-capture.mp4') {
     try {
       console.log(`🎬 Starting video capture of: ${url}`);
-      
+
       // Navigate to the website
       const timeout = (this.settings.timeout || 60) * 1000;
       await this.page.goto(url, {
@@ -112,7 +112,7 @@ class WebsiteVideoCapture {
 
       for (let i = 0; i <= scrollSteps; i++) {
         const scrollPosition = (i / scrollSteps) * totalHeight;
-        
+
         // Use requestAnimationFrame for smoother scrolling
         await this.page.evaluate((pos) => {
           return new Promise((resolve) => {
@@ -120,25 +120,25 @@ class WebsiteVideoCapture {
             const startPos = window.pageYOffset;
             const distance = pos - startPos;
             const duration = 100; // 100ms per step for smoothness
-            
+
             function animateScroll(currentTime) {
               const elapsed = currentTime - startTime;
               const progress = Math.min(elapsed / duration, 1);
-              
+
               // Easing function for smooth motion
-              const easeInOutCubic = progress < 0.5 
-                ? 4 * progress * progress * progress 
+              const easeInOutCubic = progress < 0.5
+                ? 4 * progress * progress * progress
                 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-              
+
               window.scrollTo(0, startPos + distance * easeInOutCubic);
-              
+
               if (progress < 1) {
                 requestAnimationFrame(animateScroll);
               } else {
                 resolve();
               }
             }
-            
+
             requestAnimationFrame(animateScroll);
           });
         }, scrollPosition);
@@ -152,18 +152,40 @@ class WebsiteVideoCapture {
 
       console.log('✅ Video capture completed!');
 
-      // Get the video path
-      const videoPath = await this.page.video().path();
-      
-      // Move the video to the desired location
-      const finalPath = path.join(this.outputDir, outputFilename);
-      fs.renameSync(videoPath, finalPath);
+      // Close the page to finalize the video file
+      const videoPromise = this.page.video();
+      await this.page.close();
+      await this.browser.close();
+      this.browser = null;
+      this.page = null;
 
-      console.log(`🎥 Video saved to: ${finalPath}`);
-      
-      // Apply quality improvements if ffmpeg is available
-      await this.enhanceVideoQuality(finalPath);
-      
+      // Wait for video to be fully written
+      const videoPath = await videoPromise.path();
+      console.log(`📹 Waiting for video file to finalize: ${videoPath}`);
+
+      // Wait longer for the file to be properly finalized
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Verify file exists and is readable
+      if (!fs.existsSync(videoPath)) {
+        throw new Error(`Video file not found: ${videoPath}`);
+      }
+
+      const stats = fs.statSync(videoPath);
+      console.log(`📊 Video file size: ${stats.size} bytes`);
+
+      // Convert WebM to MP4 and add audio in one step
+      const finalPath = path.join(this.outputDir, outputFilename);
+      const scrollDurationSec = scrollDuration / 1000;
+
+      console.log(`🎥 Converting video and adding audio...`);
+      await this.convertAndAddAudio(videoPath, finalPath, scrollDurationSec);
+
+      // Clean up the temporary WebM file
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+
       return finalPath;
 
     } catch (error) {
@@ -172,66 +194,98 @@ class WebsiteVideoCapture {
     }
   }
 
-  async enhanceVideoQuality(videoPath) {
+  async convertAndAddAudio(webmPath, outputPath, duration) {
     try {
       const { spawn } = require('child_process');
-      
+
       // Check if ffmpeg is available
       const ffmpegCheck = spawn('ffmpeg', ['-version'], { stdio: 'pipe' });
-      
-      await new Promise((resolve, reject) => {
+
+      const ffmpegAvailable = await new Promise((resolve) => {
         ffmpegCheck.on('close', (code) => {
-          if (code === 0) {
-            resolve();
-          } else {
-            console.log('📝 FFmpeg not available, skipping quality enhancement');
-            resolve();
-          }
+          resolve(code === 0);
+        });
+        ffmpegCheck.on('error', () => {
+          resolve(false);
         });
       });
 
-      console.log('🎨 Enhancing video quality...');
-      
-      const tempPath = videoPath.replace('.mp4', '_enhanced.mp4');
-      
-      // High-quality ffmpeg processing
-      const ffmpeg = spawn('ffmpeg', [
-        '-i', videoPath,
+      if (!ffmpegAvailable) {
+        console.log('⚠️ FFmpeg not available, saving video without audio');
+        fs.renameSync(webmPath, outputPath);
+        return;
+      }
+
+      console.log('🎵 Generating scrolling sound effect...');
+
+      // Generate scrolling audio directly in the conversion process
+      // This combines: WebM->MP4 conversion + audio generation + merge in one command
+      const convertProcess = spawn('ffmpeg', [
+        // Input WebM video
+        '-i', webmPath,
+        // Generate scrolling sound using sine waves with modulation
+        '-f', 'lavfi',
+        '-i', `sine=frequency=150:duration=${duration}`,
+        '-f', 'lavfi',
+        '-i', `sine=frequency=80:duration=${duration}`,
+        // Complex audio filter for realistic scrolling sound
+        '-filter_complex',
+        `[1:a][2:a]amix=inputs=2:duration=longest:normalize=0,volume=0.08,afade=t=in:st=0:d=0.5,afade=t=out:st=${duration - 0.5}:d=0.5,tremolo=f=4:d=0.6,asetrate=44100*0.95,aresample=44100[aout]`,
+        // Map video and generated audio
+        '-map', '0:v:0',
+        '-map', '[aout]',
+        // Video encoding settings
         '-c:v', 'libx264',
-        '-preset', 'slow',
-        '-crf', '18', // High quality (lower = better quality)
+        '-preset', 'medium',
+        '-crf', '23',
+        // Audio encoding settings
         '-c:a', 'aac',
         '-b:a', '128k',
+        // Output settings
+        '-shortest',
         '-movflags', '+faststart',
-        '-vf', 'scale=1920:1080:flags=lanczos', // Upscale to 1080p with high-quality scaling
-        '-r', '30', // 30 FPS
-        '-y', // Overwrite output
-        tempPath
-      ]);
+        '-y',
+        outputPath
+      ], { stdio: 'pipe' });
 
-      await new Promise((resolve, reject) => {
-        ffmpeg.on('close', (code) => {
+      await new Promise((resolve) => {
+        let errorOutput = '';
+
+        convertProcess.stderr.on('data', (data) => {
+          errorOutput += data.toString();
+        });
+
+        convertProcess.on('close', (code) => {
           if (code === 0) {
-            // Replace original with enhanced version
-            fs.renameSync(tempPath, videoPath);
-            console.log('✨ Video quality enhanced successfully!');
+            console.log('✅ Video converted and audio added successfully!');
             resolve();
           } else {
-            console.log('⚠️ Quality enhancement failed, using original video');
+            console.log('⚠️ Conversion failed, saving without audio');
+            console.log('Error:', errorOutput.slice(-300));
+            // Fallback: just convert to MP4 without audio
+            fs.renameSync(webmPath, outputPath);
             resolve();
           }
         });
-        
-        ffmpeg.on('error', () => {
-          console.log('⚠️ FFmpeg not available, using original video');
+
+        convertProcess.on('error', (err) => {
+          console.log('⚠️ Conversion error, saving without audio:', err.message);
+          if (fs.existsSync(webmPath)) {
+            fs.renameSync(webmPath, outputPath);
+          }
           resolve();
         });
       });
 
     } catch (error) {
-      console.log('⚠️ Quality enhancement skipped:', error.message);
+      console.log('⚠️ Audio processing failed:', error.message);
+      // Fallback: save without audio
+      if (fs.existsSync(webmPath)) {
+        fs.renameSync(webmPath, outputPath);
+      }
     }
   }
+
 
   async close() {
     if (this.browser) {

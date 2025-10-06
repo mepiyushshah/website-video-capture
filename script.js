@@ -405,11 +405,23 @@ function closeCaptureModal() {
 
 async function startCaptureProcess() {
     const url = document.getElementById('websiteUrl').value;
-    const filename = document.getElementById('outputName').value;
+    let filename = document.getElementById('outputName').value;
 
     if (!url) {
         alert('Please enter a valid URL');
         return;
+    }
+
+    // Auto-generate filename from URL if not provided
+    if (!filename || filename.trim() === '') {
+        try {
+            const urlObj = new URL(url);
+            const domain = urlObj.hostname.replace('www.', '').replace(/\./g, '-');
+            const timestamp = Date.now();
+            filename = `${domain}-${timestamp}.mp4`;
+        } catch (e) {
+            filename = `capture-${Date.now()}.mp4`;
+        }
     }
 
     // Close modal
@@ -1231,13 +1243,9 @@ function initializeVideoEditor() {
     }
 
     // Solid color input
-    const bgColor = document.getElementById('bgColor');
-    if (bgColor) {
-        bgColor.addEventListener('input', (e) => {
-            const colorCode = e.target.nextElementSibling;
-            if (colorCode) {
-                colorCode.textContent = e.target.value;
-            }
+    const bgColorInput = document.getElementById('bgColorInput');
+    if (bgColorInput) {
+        bgColorInput.addEventListener('input', (e) => {
             applySolidBackground();
         });
     }
@@ -1253,18 +1261,6 @@ function initializeVideoEditor() {
         });
     });
 
-    // Color presets
-    const colorPresets = document.querySelectorAll('.color-preset');
-    colorPresets.forEach(preset => {
-        preset.addEventListener('click', () => {
-            const color = preset.style.background;
-            if (bgColor) {
-                bgColor.value = color;
-                bgColor.nextElementSibling.textContent = color;
-            }
-            applySolidBackground();
-        });
-    });
 
     // Padding slider
     const paddingSlider = document.getElementById('paddingSlider');
@@ -1307,11 +1303,15 @@ function applyGradientBackground() {
 }
 
 function applySolidBackground() {
-    const bgColor = document.getElementById('bgColor');
+    const bgColorInput = document.getElementById('bgColorInput');
     const videoWrapper = document.getElementById('videoWrapper');
 
-    if (bgColor && videoWrapper) {
-        videoWrapper.style.background = bgColor.value;
+    if (bgColorInput && videoWrapper) {
+        const colorValue = bgColorInput.value.trim();
+        // Apply the color directly - supports hex, rgb, rgba, named colors, etc.
+        if (colorValue) {
+            videoWrapper.style.background = colorValue;
+        }
     }
 }
 
