@@ -469,6 +469,19 @@ input::placeholder, textarea::placeholder {
 }
 
 
+/* Trademark Styling */
+.logo sup {
+    font-size: 0.6em;
+    opacity: 0.8;
+    margin-left: 2px;
+}
+
+h3 sup {
+    font-size: 0.5em;
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
 /* Main Content Layout */
 .main-content {
     display: flex;
