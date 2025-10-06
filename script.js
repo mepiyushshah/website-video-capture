@@ -5,12 +5,15 @@ let currentVideo = null;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing application...');
-    
+
+    // Clear any existing error messages
+    clearAllMessages();
+
     // Check if user is logged in
     if (!isLoggedIn()) {
         showLoginModal();
     }
-    
+
     initializeVideoPlayer();
     setupEventListeners();
     loadVideoList();
@@ -501,7 +504,8 @@ async function startCaptureProcess() {
             clearInterval(progressInterval);
         }
         hideLoadingState();
-        showErrorMessage(`Network error: ${error.message}`);
+        console.error('Capture error:', error);
+        showErrorMessage(`Failed to capture video. Please check server connection.`);
     }
 }
 
@@ -676,18 +680,18 @@ function showMessage(message, type = 'info') {
     // Remove existing toasts
     const existingToasts = document.querySelectorAll('.toast');
     existingToasts.forEach(toast => toast.remove());
-    
+
     // Create new toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    
+
     // Trigger slide-in animation
     setTimeout(() => {
         toast.classList.add('show');
     }, 10);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
         toast.classList.remove('show');
@@ -697,16 +701,35 @@ function showMessage(message, type = 'info') {
     }, 5000);
 }
 
+function clearAllMessages() {
+    // Remove all existing toast messages
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+}
+
+function ensureSidebarVisible() {
+    // Make sure the sidebar is visible
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.style.display = 'flex';
+    }
+}
+
 async function loadVideoList() {
     try {
         const response = await fetch('/api/videos');
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        
+
         // Update file explorer with actual videos
         const fileTree = document.querySelector('.file-tree');
         const existingFiles = fileTree.querySelectorAll('.file-item');
         existingFiles.forEach(item => item.remove());
-        
+
         data.videos.forEach(video => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
@@ -717,13 +740,14 @@ async function loadVideoList() {
             fileItem.addEventListener('click', () => loadVideo(video.name));
             fileTree.appendChild(fileItem);
         });
-        
+
         // If there are videos, load the first one
         if (data.videos.length > 0) {
             loadVideo(data.videos[0].name);
         }
     } catch (error) {
-        console.error('Failed to load video list:', error);
+        console.log('Note: Video list could not be loaded from server. Using local videos.');
+        // Don't show error toast on initial load - this is expected when using local files
     }
 }
 
