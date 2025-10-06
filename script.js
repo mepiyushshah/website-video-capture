@@ -489,6 +489,19 @@ async function startCaptureProcess() {
                 hideLoadingState();
                 showSuccessMessage(`Video captured successfully: ${filename}`);
 
+                // Hide explorer panel and show editor panel
+                const explorerPanel = document.getElementById('explorerPanel');
+                const editorPanel = document.getElementById('editorPanel');
+                if (explorerPanel) {
+                    explorerPanel.style.display = 'none';
+                }
+                if (editorPanel) {
+                    editorPanel.style.display = 'flex';
+                }
+
+                // Initialize editor controls
+                initializeVideoEditor();
+
                 // Refresh video list
                 loadVideoList().then(() => {
                     // Load the new video
@@ -1170,7 +1183,166 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Video Editor Functions
+function initializeVideoEditor() {
+    const videoPlayer = document.getElementById('mainVideo');
+    const videoWrapper = document.getElementById('videoWrapper');
+
+    // Background tab switching
+    const bgTabs = document.querySelectorAll('.bg-tab');
+    const gradientSection = document.getElementById('gradientSection');
+    const colorSection = document.getElementById('colorSection');
+
+    bgTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            bgTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const type = tab.getAttribute('data-type');
+            if (type === 'gradient') {
+                gradientSection.style.display = 'block';
+                colorSection.style.display = 'none';
+                applyGradientBackground();
+            } else if (type === 'color') {
+                gradientSection.style.display = 'none';
+                colorSection.style.display = 'block';
+                applySolidBackground();
+            } else if (type === 'image') {
+                gradientSection.style.display = 'none';
+                colorSection.style.display = 'none';
+            }
+        });
+    });
+
+    // Gradient color inputs
+    const gradientColor1 = document.getElementById('gradientColor1');
+    const gradientColor2 = document.getElementById('gradientColor2');
+
+    if (gradientColor1 && gradientColor2) {
+        [gradientColor1, gradientColor2].forEach(input => {
+            input.addEventListener('input', (e) => {
+                const colorCode = e.target.nextElementSibling;
+                if (colorCode) {
+                    colorCode.textContent = e.target.value;
+                }
+                applyGradientBackground();
+            });
+        });
+    }
+
+    // Solid color input
+    const bgColor = document.getElementById('bgColor');
+    if (bgColor) {
+        bgColor.addEventListener('input', (e) => {
+            const colorCode = e.target.nextElementSibling;
+            if (colorCode) {
+                colorCode.textContent = e.target.value;
+            }
+            applySolidBackground();
+        });
+    }
+
+    // Gradient presets
+    const gradientPresets = document.querySelectorAll('.gradient-preset');
+    gradientPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            const bg = preset.style.background;
+            if (videoWrapper) {
+                videoWrapper.style.background = bg;
+            }
+        });
+    });
+
+    // Color presets
+    const colorPresets = document.querySelectorAll('.color-preset');
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            const color = preset.style.background;
+            if (bgColor) {
+                bgColor.value = color;
+                bgColor.nextElementSibling.textContent = color;
+            }
+            applySolidBackground();
+        });
+    });
+
+    // Padding slider
+    const paddingSlider = document.getElementById('paddingSlider');
+    const paddingValue = document.getElementById('paddingValue');
+
+    if (paddingSlider && paddingValue) {
+        paddingSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            paddingValue.textContent = value;
+            if (videoPlayer) {
+                videoPlayer.style.padding = `${value}px`;
+            }
+        });
+    }
+
+    // Corner radius slider
+    const cornerSlider = document.getElementById('cornerSlider');
+    const cornerValue = document.getElementById('cornerValue');
+
+    if (cornerSlider && cornerValue) {
+        cornerSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            cornerValue.textContent = value;
+            if (videoPlayer) {
+                videoPlayer.style.borderRadius = `${value}px`;
+            }
+        });
+    }
+}
+
+function applyGradientBackground() {
+    const gradientColor1 = document.getElementById('gradientColor1');
+    const gradientColor2 = document.getElementById('gradientColor2');
+    const videoWrapper = document.getElementById('videoWrapper');
+
+    if (gradientColor1 && gradientColor2 && videoWrapper) {
+        const gradient = `linear-gradient(135deg, ${gradientColor1.value} 0%, ${gradientColor2.value} 100%)`;
+        videoWrapper.style.background = gradient;
+    }
+}
+
+function applySolidBackground() {
+    const bgColor = document.getElementById('bgColor');
+    const videoWrapper = document.getElementById('videoWrapper');
+
+    if (bgColor && videoWrapper) {
+        videoWrapper.style.background = bgColor.value;
+    }
+}
+
+function resetPadding() {
+    const paddingSlider = document.getElementById('paddingSlider');
+    const paddingValue = document.getElementById('paddingValue');
+    const mainVideo = document.getElementById('mainVideo');
+
+    if (paddingSlider && paddingValue && mainVideo) {
+        paddingSlider.value = 40;
+        paddingValue.textContent = '40';
+        mainVideo.style.padding = '40px';
+    }
+}
+
+function resetRoundedCorners() {
+    const cornerSlider = document.getElementById('cornerSlider');
+    const cornerValue = document.getElementById('cornerValue');
+    const mainVideo = document.getElementById('mainVideo');
+
+    if (cornerSlider && cornerValue && mainVideo) {
+        cornerSlider.value = 12;
+        cornerValue.textContent = '12';
+        mainVideo.style.borderRadius = '12px';
+    }
+}
+
 // Make functions globally available
 window.closeLoginModal = closeLoginModal;
 window.handleLogin = handleLogin;
 window.logout = logout;
+window.initializeVideoEditor = initializeVideoEditor;
+window.resetPadding = resetPadding;
+window.resetRoundedCorners = resetRoundedCorners;

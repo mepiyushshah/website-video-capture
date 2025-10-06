@@ -608,11 +608,248 @@ h3 sup {
     cursor: pointer;
 }
 
+/* Explorer Panel */
+.explorer-panel {
+    border-bottom: 1px solid #2d2d2d;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.explorer-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+}
+
+.explorer-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.explorer-empty i.fa-globe {
+    font-size: 64px;
+    color: #404040;
+    margin-bottom: 24px;
+}
+
+.explorer-empty h3 {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+}
+
+.explorer-empty p {
+    color: #9d9d9d;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+
+.explorer-empty .primary-btn {
+    background: linear-gradient(135deg, #1f5afe 0%, #00a8ff 100%);
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.explorer-empty .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31, 90, 254, 0.4);
+}
+
+/* Video Editor Panel */
+.editor-panel {
+    border-bottom: 1px solid #2d2d2d;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.editor-content {
+    padding: 20px;
+}
+
+.bg-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #1a1a1a;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.bg-tab {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.bg-tab.active {
+    background: #2d2d2d;
+    color: #fff;
+}
+
+.bg-section {
+    margin-bottom: 24px;
+}
+
+.section-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.reset-btn {
+    background: transparent;
+    border: none;
+    color: #4a9eff;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.reset-btn:hover {
+    text-decoration: underline;
+}
+
+.gradient-colors {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.color-input-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1a1a1a;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.color-input-group input[type="color"] {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.color-input-group input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-input-group input[type="color"]::-webkit-color-swatch {
+    border: 2px solid #2d2d2d;
+    border-radius: 6px;
+}
+
+.color-code {
+    color: #888;
+    font-size: 12px;
+    font-family: 'Monaco', monospace;
+}
+
+.gradient-presets,
+.color-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.gradient-preset,
+.color-preset {
+    aspect-ratio: 1;
+    border: 2px solid #2d2d2d;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gradient-preset:hover,
+.color-preset:hover {
+    transform: scale(1.05);
+    border-color: #4a9eff;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #1a1a1a;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a9eff;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a9eff;
+    cursor: pointer;
+    border: none;
+}
+
+.slider-value {
+    text-align: right;
+    color: #888;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.slider-value span {
+    color: #fff;
+    font-weight: 600;
+}
+
 /* AI Assistant Panel */
 .ai-panel {
     border-bottom: 1px solid #2d2d2d;
     flex: 1;
-    display: flex;
     flex-direction: column;
     min-height: 0;
 }

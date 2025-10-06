@@ -65,14 +65,14 @@ class WebsiteVideoCapture {
       console.log(`🎬 Starting video capture of: ${url}`);
       
       // Navigate to the website
-      const timeout = (this.settings.timeout || 30) * 1000;
-      await this.page.goto(url, { 
-        waitUntil: 'networkidle',
-        timeout: timeout 
+      const timeout = (this.settings.timeout || 60) * 1000;
+      await this.page.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: timeout
       });
 
       // Wait for dynamic content to load
-      const waitTime = (this.settings.waitTime || 2) * 1000;
+      const waitTime = (this.settings.waitTime || 5) * 1000;
       await this.page.waitForTimeout(waitTime);
 
       // Take a screenshot for thumbnail
