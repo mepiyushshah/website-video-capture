@@ -82,3 +82,4 @@ typings/
 
 # Temporary files
 temp-settings.json
+.vercel
