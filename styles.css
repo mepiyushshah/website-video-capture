@@ -744,6 +744,59 @@ h3 sup {
     text-decoration: underline;
 }
 
+.render-btn {
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.render-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.render-btn:active {
+    transform: translateY(0);
+}
+
+.render-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.progress-text {
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
 .gradient-colors {
     display: flex;
     gap: 12px;

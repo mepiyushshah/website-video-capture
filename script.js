@@ -1152,23 +1152,20 @@ function handleLogin() {
     }
     
     // Simple authentication (in real app, this would be server-side)
-    if (email === 'your@your.com' && password === 'password') {
-        // Set login status
-        localStorage.setItem('userLoggedIn', 'true');
-        localStorage.setItem('userEmail', email);
-        
-        if (rememberMe) {
-            localStorage.setItem('rememberUser', 'true');
-        }
-        
-        showMessage('Login successful! Welcome to CaptureStudio', 'success');
-        closeLoginModal();
-        
-        // Update user info in header
-        updateUserInfo(email);
-    } else {
-        showMessage('Invalid email or password', 'error');
+    // Accept any email/password for demo purposes
+    // Set login status
+    localStorage.setItem('userLoggedIn', 'true');
+    localStorage.setItem('userEmail', email);
+
+    if (rememberMe) {
+        localStorage.setItem('rememberUser', 'true');
     }
+
+    showMessage('Login successful! Welcome to CaptureStudio', 'success');
+    closeLoginModal();
+
+    // Update user info in header
+    updateUserInfo(email);
 }
 
 function updateUserInfo(email) {
@@ -1339,6 +1336,93 @@ function resetRoundedCorners() {
     }
 }
 
+async function renderVideo() {
+    const renderBtn = document.getElementById('renderBtn');
+    const renderProgress = document.getElementById('renderProgress');
+    const renderProgressFill = document.getElementById('renderProgressFill');
+
+    if (!currentVideo || !currentVideo.src) {
+        alert('No video loaded');
+        return;
+    }
+
+    // Get current filename from video src
+    const videoSrc = currentVideo.src;
+    const filename = videoSrc.split('/').pop();
+
+    // Get current background settings
+    const videoWrapper = document.getElementById('videoWrapper');
+    const backgroundStyle = window.getComputedStyle(videoWrapper).background;
+
+    // Determine background type
+    let background = {
+        type: 'solid',
+        value: '#1a1a1a'
+    };
+
+    if (backgroundStyle.includes('gradient')) {
+        background.type = 'gradient';
+        background.value = backgroundStyle;
+    } else {
+        // Extract solid color
+        const bgColor = document.getElementById('bgColor');
+        if (bgColor) {
+            background.type = 'solid';
+            background.value = bgColor.value;
+        }
+    }
+
+    console.log('Rendering video with background:', background);
+
+    // Show progress
+    renderBtn.disabled = true;
+    renderProgress.style.display = 'block';
+    renderProgressFill.style.width = '30%';
+
+    try {
+        const response = await fetch('/api/render', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                filename: filename,
+                background: background
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            renderProgressFill.style.width = '100%';
+
+            // Download the rendered video
+            const downloadLink = document.createElement('a');
+            downloadLink.href = data.path;
+            downloadLink.download = data.filename;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            setTimeout(() => {
+                renderProgress.style.display = 'none';
+                renderProgressFill.style.width = '0%';
+                renderBtn.disabled = false;
+            }, 1000);
+
+            console.log('✅ Video rendered successfully:', data.filename);
+        } else {
+            throw new Error(data.error || 'Render failed');
+        }
+    } catch (error) {
+        console.error('Render error:', error);
+        alert('Failed to render video: ' + error.message);
+        renderProgress.style.display = 'none';
+        renderProgressFill.style.width = '0%';
+        renderBtn.disabled = false;
+    }
+}
+
 // Make functions globally available
 window.closeLoginModal = closeLoginModal;
 window.handleLogin = handleLogin;
@@ -1346,3 +1430,4 @@ window.logout = logout;
 window.initializeVideoEditor = initializeVideoEditor;
 window.resetPadding = resetPadding;
 window.resetRoundedCorners = resetRoundedCorners;
+window.renderVideo = renderVideo;
