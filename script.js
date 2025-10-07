@@ -825,7 +825,7 @@ function loadCurrentSettings() {
     // Set form values
     document.getElementById('resolution').value = settings.resolution || '1280x720';
     document.getElementById('fps').value = settings.fps || '30';
-    document.getElementById('scrollDuration').value = settings.scrollDuration || 10;
+    document.getElementById('scrollDuration').value = settings.scrollDuration || 0;
     document.getElementById('scrollEasing').value = settings.scrollEasing || 'ease-in-out';
     document.getElementById('waitTime').value = settings.waitTime || 2;
     document.getElementById('timeout').value = settings.timeout || 30;
@@ -907,7 +907,7 @@ function resetSettings() {
 // Range value update functions
 function updateScrollDuration() {
     const value = document.getElementById('scrollDuration').value;
-    document.getElementById('scrollDurationValue').textContent = value + 's';
+    document.getElementById('scrollDurationValue').textContent = value === '0' ? 'Auto' : value + 's';
 }
 
 function updateWaitTime() {

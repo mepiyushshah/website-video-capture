@@ -77,78 +77,101 @@ class WebsiteVideoCapture {
 
       // Take a screenshot for thumbnail
       const screenshotPath = path.join(this.outputDir, outputFilename.replace('.mp4', '_thumb.png'));
-      await this.page.screenshot({ 
+      await this.page.screenshot({
         path: screenshotPath,
         fullPage: false,
         clip: { x: 0, y: 0, width: 1280, height: 720 }
       });
       console.log(`📸 Screenshot saved: ${screenshotPath}`);
 
-      // Get the total height of the page
-      const totalHeight = await this.page.evaluate(() => {
-        return Math.max(
-          document.body.scrollHeight,
-          document.body.offsetHeight,
-          document.documentElement.clientHeight,
-          document.documentElement.scrollHeight,
-          document.documentElement.offsetHeight
-        );
-      });
+      console.log('🔄 Loading full page content...');
 
-      console.log(`📏 Page height: ${totalHeight}px`);
+      // Step 1: Scroll to bottom multiple times to load ALL content
+      let previousHeight = 0;
+      let currentHeight = await this.page.evaluate(() => document.documentElement.scrollHeight);
+      let attempts = 0;
+      const maxAttempts = 20;
 
-      // High-quality smooth scroll from top to bottom
-      const scrollDuration = (this.settings.scrollDuration || 10) * 1000;
-      const scrollSteps = 200; // More steps for smoother video
-      const stepDuration = scrollDuration / scrollSteps;
+      while (previousHeight !== currentHeight && attempts < maxAttempts) {
+        previousHeight = currentHeight;
 
-      console.log('🎯 Starting high-quality smooth scroll capture...');
+        // Scroll to bottom
+        await this.page.evaluate(() => {
+          window.scrollTo(0, document.documentElement.scrollHeight);
+        });
 
-      // Start at the very top
-      await this.page.evaluate(() => {
-        window.scrollTo(0, 0);
-      });
-      await this.page.waitForTimeout(500);
+        // Wait for content to load
+        await this.page.waitForTimeout(1000);
 
-      for (let i = 0; i <= scrollSteps; i++) {
-        const scrollPosition = (i / scrollSteps) * totalHeight;
-
-        // Use requestAnimationFrame for smoother scrolling
-        await this.page.evaluate((pos) => {
-          return new Promise((resolve) => {
-            const startTime = performance.now();
-            const startPos = window.pageYOffset;
-            const distance = pos - startPos;
-            const duration = 100; // 100ms per step for smoothness
-
-            function animateScroll(currentTime) {
-              const elapsed = currentTime - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-
-              // Easing function for smooth motion
-              const easeInOutCubic = progress < 0.5
-                ? 4 * progress * progress * progress
-                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-              window.scrollTo(0, startPos + distance * easeInOutCubic);
-
-              if (progress < 1) {
-                requestAnimationFrame(animateScroll);
-              } else {
-                resolve();
-              }
-            }
-
-            requestAnimationFrame(animateScroll);
-          });
-        }, scrollPosition);
-
-        // Wait for the scroll step to complete
-        await this.page.waitForTimeout(stepDuration);
+        // Get new height
+        currentHeight = await this.page.evaluate(() => document.documentElement.scrollHeight);
+        attempts++;
       }
 
-      // Wait a bit more at the bottom
+      console.log(`📏 Full page loaded: ${currentHeight}px (after ${attempts} attempts)`);
+
+      // Step 2: Go back to top
+      await this.page.evaluate(() => window.scrollTo(0, 0));
       await this.page.waitForTimeout(1000);
+
+      // Step 3: Calculate how much to scroll
+      const pageInfo = await this.page.evaluate(() => {
+        const totalHeight = document.documentElement.scrollHeight;
+        const viewportHeight = window.innerHeight;
+        const maxScroll = totalHeight - viewportHeight;
+
+        return { totalHeight, viewportHeight, maxScroll };
+      });
+
+      console.log(`📐 Total: ${pageInfo.totalHeight}px, Viewport: ${pageInfo.viewportHeight}px, Will scroll: ${pageInfo.maxScroll}px`);
+
+      // Step 4: Calculate scroll duration
+      let scrollDuration;
+      if (this.settings.scrollDuration && this.settings.scrollDuration > 0) {
+        scrollDuration = this.settings.scrollDuration * 1000;
+      } else {
+        // 2 seconds per viewport height
+        const viewportCount = Math.ceil(pageInfo.maxScroll / pageInfo.viewportHeight);
+        scrollDuration = Math.max(10000, viewportCount * 2000);
+      }
+
+      console.log(`⏱️  Scroll duration: ${scrollDuration / 1000}s`);
+      console.log('🎬 Recording smooth scroll from header to footer...');
+
+      // Step 5: Scroll in small steps with proper timing for video capture
+      // Use 100ms per step for reliable video capture at 25fps (Playwright default)
+      const stepDelay = 100;
+      const totalSteps = Math.ceil(scrollDuration / stepDelay);
+      const pixelsPerStep = pageInfo.maxScroll / totalSteps;
+
+      console.log(`📊 Scrolling ${totalSteps} steps, ${pixelsPerStep.toFixed(2)}px per step`);
+
+      for (let step = 0; step <= totalSteps; step++) {
+        const targetScroll = Math.min(Math.round(step * pixelsPerStep), pageInfo.maxScroll);
+
+        await this.page.evaluate((scrollY) => {
+          window.scrollTo(0, scrollY);
+        }, targetScroll);
+
+        // Wait for video frame to be captured + content to render
+        await this.page.waitForTimeout(stepDelay);
+
+        // Progress indicator
+        if (step % 50 === 0) {
+          const progress = ((step / totalSteps) * 100).toFixed(1);
+          console.log(`📹 Progress: ${progress}%`);
+        }
+      }
+
+      // Ensure we're at the exact bottom
+      await this.page.evaluate((maxScroll) => {
+        window.scrollTo(0, maxScroll);
+      }, pageInfo.maxScroll);
+
+      console.log('📹 Progress: 100% - Reached footer!');
+
+      // Wait at footer
+      await this.page.waitForTimeout(2000);
 
       console.log('✅ Video capture completed!');
 
