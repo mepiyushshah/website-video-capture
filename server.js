@@ -118,7 +118,7 @@ app.delete('/api/videos/:filename', (req, res) => {
 
 // API endpoint to render video with background
 app.post('/api/render', async (req, res) => {
-    const { filename, background } = req.body;
+    const { filename, background, padding } = req.body;
 
     if (!filename || !background) {
         return res.status(400).json({ error: 'Filename and background are required' });
@@ -131,14 +131,14 @@ app.post('/api/render', async (req, res) => {
             return res.status(404).json({ error: 'Video not found' });
         }
 
-        console.log(`🎨 Rendering video with background: ${filename}`);
+        console.log(`🎨 Rendering video with background: ${filename}`, { background, padding });
 
         // Generate output filename
         const outputFilename = filename.replace('.mp4', '_rendered.mp4');
         const outputPath = path.join(__dirname, 'captures', outputFilename);
 
         // Render video with background
-        await renderVideoWithBackground(inputPath, outputPath, background);
+        await renderVideoWithBackground(inputPath, outputPath, background, padding || 40);
 
         res.json({
             success: true,
@@ -153,15 +153,15 @@ app.post('/api/render', async (req, res) => {
     }
 });
 
-async function renderVideoWithBackground(inputPath, outputPath, background) {
+async function renderVideoWithBackground(inputPath, outputPath, background, padding = 40) {
     return new Promise((resolve, reject) => {
-        console.log('🎬 Starting FFmpeg render...');
+        console.log('🎬 Starting FFmpeg render...', { background, padding });
 
-        // Get video dimensions first
+        // Get video dimensions and duration first
         const probeProcess = spawn('ffprobe', [
             '-v', 'error',
             '-select_streams', 'v:0',
-            '-show_entries', 'stream=width,height',
+            '-show_entries', 'stream=width,height,duration',
             '-of', 'csv=p=0',
             inputPath
         ]);
@@ -177,37 +177,61 @@ async function renderVideoWithBackground(inputPath, outputPath, background) {
                 return;
             }
 
-            const [videoWidth, videoHeight] = probeOutput.trim().split(',').map(Number);
-            console.log(`📺 Video dimensions: ${videoWidth}x${videoHeight}`);
+            const [videoWidth, videoHeight, duration] = probeOutput.trim().split(',');
+            console.log(`📺 Video dimensions: ${videoWidth}x${videoHeight}, duration: ${duration}s`);
 
-            // Parse background
-            let filterComplex = '';
+            // Calculate output dimensions with padding
+            const outputWidth = 1920;
+            const outputHeight = 1080;
+
+            let ffmpegArgs = [];
 
             if (background.type === 'gradient') {
-                // Create gradient background
+                // Extract gradient colors
                 const colors = parseGradientColors(background.value);
-                filterComplex = `color=${colors[0]}:s=1920x1080[bg];[bg]gradients=colors='${colors.join(':')}':type=${background.direction || 'linear'}:s=1920x1080[grad];[grad][0:v]overlay=(W-w)/2:(H-h)/2`;
-            } else if (background.type === 'solid') {
-                // Create solid color background
-                const color = background.value.replace('#', '0x');
-                filterComplex = `color=${color}:s=1920x1080[bg];[bg][0:v]overlay=(W-w)/2:(H-h)/2`;
-            } else {
-                reject(new Error('Unknown background type'));
-                return;
-            }
+                console.log('🎨 Gradient colors:', colors);
 
-            // Run FFmpeg to composite video with background
-            const ffmpegArgs = [
-                '-i', inputPath,
-                '-f', 'lavfi', '-i', `color=${parseBackgroundColor(background)}:s=1920x1080:d=0.1`,
-                '-filter_complex', `[1:v][0:v]scale2ref=w=oh*mdar:h=ih[bg][vid];[bg]setsar=1[bg];[bg][vid]overlay=(W-w)/2:(H-h)/2:format=auto`,
-                '-c:v', 'libx264',
-                '-preset', 'medium',
-                '-crf', '23',
-                '-movflags', '+faststart',
-                '-y',
-                outputPath
-            ];
+                // Create gradient using geq filter
+                ffmpegArgs = [
+                    '-i', inputPath,
+                    '-f', 'lavfi', '-i', `color=c=${colors[0]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                    '-f', 'lavfi', '-i', `color=c=${colors[1]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                    '-filter_complex',
+                    `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];` +
+                    `[0:v]scale=w=${outputWidth-padding*2}:h=${outputHeight-padding*2}:force_original_aspect_ratio=decrease[scaled];` +
+                    `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`,
+                    '-map', '[outv]',
+                    '-map', '0:a?',
+                    '-c:v', 'libx264',
+                    '-preset', 'medium',
+                    '-crf', '23',
+                    '-pix_fmt', 'yuv420p',
+                    '-movflags', '+faststart',
+                    '-y',
+                    outputPath
+                ];
+            } else {
+                // Solid color background
+                const color = parseBackgroundColor(background);
+                console.log('🎨 Solid color:', color);
+
+                ffmpegArgs = [
+                    '-i', inputPath,
+                    '-f', 'lavfi', '-i', `color=c=${color}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                    '-filter_complex',
+                    `[0:v]scale=w=${outputWidth-padding*2}:h=${outputHeight-padding*2}:force_original_aspect_ratio=decrease[scaled];` +
+                    `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`,
+                    '-map', '[outv]',
+                    '-map', '0:a?',
+                    '-c:v', 'libx264',
+                    '-preset', 'medium',
+                    '-crf', '23',
+                    '-pix_fmt', 'yuv420p',
+                    '-movflags', '+faststart',
+                    '-y',
+                    outputPath
+                ];
+            }
 
             console.log('🎨 FFmpeg command:', 'ffmpeg', ffmpegArgs.join(' '));
 
@@ -238,12 +262,33 @@ async function renderVideoWithBackground(inputPath, outputPath, background) {
 
 function parseBackgroundColor(background) {
     if (background.type === 'solid') {
-        return background.value.replace('#', '0x');
+        const color = background.value;
+        // Handle hex colors
+        if (color.startsWith('#')) {
+            return color.replace('#', '0x');
+        }
+        // Handle rgb/rgba colors
+        if (color.startsWith('rgb')) {
+            const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (match) {
+                const [, r, g, b] = match;
+                const hex = ((parseInt(r) << 16) | (parseInt(g) << 8) | parseInt(b)).toString(16).padStart(6, '0');
+                return `0x${hex}`;
+            }
+        }
+        return '0x1a1a1a';
     } else if (background.type === 'gradient') {
-        // For gradients, we'll use a complex filter
-        const match = background.value.match(/linear-gradient\([^,]+,\s*([^,]+)/);
+        // For gradients, extract the first color
+        const match = background.value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (match) {
-            return match[1].trim().replace('#', '0x');
+            const [, r, g, b] = match;
+            const hex = ((parseInt(r) << 16) | (parseInt(g) << 8) | parseInt(b)).toString(16).padStart(6, '0');
+            return `0x${hex}`;
+        }
+        // Try hex color
+        const hexMatch = background.value.match(/#[0-9a-f]{6}/i);
+        if (hexMatch) {
+            return hexMatch[0].replace('#', '0x');
         }
         return '0x1a1a1a';
     }
@@ -251,8 +296,23 @@ function parseBackgroundColor(background) {
 }
 
 function parseGradientColors(gradientString) {
-    const matches = gradientString.match(/#[0-9a-f]{6}/gi);
-    return matches ? matches.map(c => c.replace('#', '0x')) : ['0x1a1a1a', '0x2a2a2a'];
+    // Try to match hex colors first
+    const hexMatches = gradientString.match(/#[0-9a-f]{6}/gi);
+    if (hexMatches && hexMatches.length >= 2) {
+        return hexMatches.slice(0, 2).map(c => c.replace('#', '0x'));
+    }
+
+    // Try to match rgb colors
+    const rgbMatches = [...gradientString.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)];
+    if (rgbMatches && rgbMatches.length >= 2) {
+        return rgbMatches.slice(0, 2).map(match => {
+            const [, r, g, b] = match;
+            const hex = ((parseInt(r) << 16) | (parseInt(g) << 8) | parseInt(b)).toString(16).padStart(6, '0');
+            return `0x${hex}`;
+        });
+    }
+
+    return ['0x1a1a1a', '0x2a2a2a'];
 }
 
 // Serve the main page

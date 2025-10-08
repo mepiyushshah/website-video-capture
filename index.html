@@ -56,30 +56,6 @@
 
 
         <div class="main-content">
-            <!-- Left Sidebar Navigation -->
-            <div class="sidebar-nav">
-                <nav class="sidebar-menu">
-                    <div class="menu-section">
-                        <div class="menu-item active" data-section="dashboard">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Dashboard</span>
-                        </div>
-                        <div class="menu-item" data-section="playground">
-                            <i class="fas fa-play-circle"></i>
-                            <span>Playground</span>
-                        </div>
-                        <div class="menu-item" data-section="api-keys">
-                            <i class="fas fa-key"></i>
-                            <span>API Keys</span>
-                        </div>
-                        <div class="menu-item" data-section="history">
-                            <i class="fas fa-history"></i>
-                            <span>History</span>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-
             <!-- Left Sidebar -->
             <div class="sidebar" id="mainSidebar" style="display: none;">
                 <!-- Website Capture Panel (shown by default) -->
@@ -158,16 +134,6 @@
                             </label>
                             <input type="range" id="paddingSlider" min="0" max="100" value="40" class="slider">
                             <div class="slider-value"><span id="paddingValue">40</span>px</div>
-                        </div>
-
-                        <!-- Rounded Corners Control -->
-                        <div class="bg-section">
-                            <label class="section-label">
-                                Rounded corners
-                                <button class="reset-btn" onclick="resetRoundedCorners()">Reset</button>
-                            </label>
-                            <input type="range" id="cornerSlider" min="0" max="50" value="12" class="slider">
-                            <div class="slider-value"><span id="cornerValue">12</span>px</div>
                         </div>
 
                         <!-- Export/Render Button -->
@@ -419,10 +385,30 @@
                     </div>
                     
                     <div class="video-wrapper" id="videoWrapper">
-                        <video id="mainVideo" controls>
+                        <video id="mainVideo">
                             <source src="captures/website-capture.mp4" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
+                        <div class="custom-video-controls" id="customControls">
+                            <div class="progress-container" id="progressContainer">
+                                <div class="progress-bar-video" id="progressBar"></div>
+                            </div>
+                            <div class="controls-bottom">
+                                <button class="control-icon" id="playPauseControl">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                                <div class="volume-control">
+                                    <button class="control-icon" id="volumeControl">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                    <input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
+                                </div>
+                                <button class="control-icon" id="fullscreenControl">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
                         
                         <!-- Video Overlay for when no video is loaded -->
                         <div class="video-placeholder" id="videoPlaceholder">

@@ -32,7 +32,7 @@ function initializeVideoPlayer() {
 
 function setupEventListeners() {
     console.log('🔧 Setting up event listeners...');
-    
+
     // Play/Pause button
     const playPauseBtn = document.getElementById('playPauseBtn');
     if (playPauseBtn) {
@@ -41,6 +41,9 @@ function setupEventListeners() {
     } else {
         console.log('❌ Play/Pause button not found');
     }
+
+    // Custom video controls
+    setupCustomVideoControls();
     
     // Video events
     if (currentVideo) {
@@ -1273,19 +1276,6 @@ function initializeVideoEditor() {
         });
     }
 
-    // Corner radius slider
-    const cornerSlider = document.getElementById('cornerSlider');
-    const cornerValue = document.getElementById('cornerValue');
-
-    if (cornerSlider && cornerValue) {
-        cornerSlider.addEventListener('input', (e) => {
-            const value = e.target.value;
-            cornerValue.textContent = value;
-            if (videoPlayer) {
-                videoPlayer.style.borderRadius = `${value}px`;
-            }
-        });
-    }
 }
 
 function applyGradientBackground() {
@@ -1324,17 +1314,6 @@ function resetPadding() {
     }
 }
 
-function resetRoundedCorners() {
-    const cornerSlider = document.getElementById('cornerSlider');
-    const cornerValue = document.getElementById('cornerValue');
-    const mainVideo = document.getElementById('mainVideo');
-
-    if (cornerSlider && cornerValue && mainVideo) {
-        cornerSlider.value = 12;
-        cornerValue.textContent = '12';
-        mainVideo.style.borderRadius = '12px';
-    }
-}
 
 async function renderVideo() {
     const renderBtn = document.getElementById('renderBtn');
@@ -1352,27 +1331,43 @@ async function renderVideo() {
 
     // Get current background settings
     const videoWrapper = document.getElementById('videoWrapper');
-    const backgroundStyle = window.getComputedStyle(videoWrapper).background;
 
-    // Determine background type
+    // Find the active background tab
+    const activeTab = document.querySelector('.bg-tab.active');
+    const activeType = activeTab ? activeTab.getAttribute('data-type') : 'color';
+
     let background = {
         type: 'solid',
-        value: '#1a1a1a'
+        value: '#000000'
     };
 
-    if (backgroundStyle.includes('gradient')) {
-        background.type = 'gradient';
-        background.value = backgroundStyle;
-    } else {
-        // Extract solid color
+    console.log('Active background type:', activeType);
+
+    if (activeType === 'gradient') {
+        // Get gradient colors
+        const gradientColor1 = document.getElementById('gradientColor1');
+        const gradientColor2 = document.getElementById('gradientColor2');
+
+        if (gradientColor1 && gradientColor2) {
+            background.type = 'gradient';
+            background.value = `linear-gradient(135deg, ${gradientColor1.value}, ${gradientColor2.value})`;
+            console.log('Gradient colors:', gradientColor1.value, gradientColor2.value);
+        }
+    } else if (activeType === 'color') {
+        // Get solid color
         const bgColor = document.getElementById('bgColor');
         if (bgColor) {
             background.type = 'solid';
             background.value = bgColor.value;
+            console.log('Solid color:', bgColor.value);
         }
     }
 
-    console.log('Rendering video with background:', background);
+    // Get padding value
+    const paddingSlider = document.getElementById('paddingSlider');
+    const padding = paddingSlider ? parseInt(paddingSlider.value) : 40;
+
+    console.log('Rendering video with background:', background, 'padding:', padding);
 
     // Show progress
     renderBtn.disabled = true;
@@ -1387,7 +1382,8 @@ async function renderVideo() {
             },
             body: JSON.stringify({
                 filename: filename,
-                background: background
+                background: background,
+                padding: padding
             })
         });
 
@@ -1429,5 +1425,87 @@ window.handleLogin = handleLogin;
 window.logout = logout;
 window.initializeVideoEditor = initializeVideoEditor;
 window.resetPadding = resetPadding;
-window.resetRoundedCorners = resetRoundedCorners;
 window.renderVideo = renderVideo;
+
+// Custom Video Controls
+function setupCustomVideoControls() {
+    const video = document.getElementById('mainVideo');
+    const playPauseControl = document.getElementById('playPauseControl');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const volumeControl = document.getElementById('volumeControl');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const fullscreenControl = document.getElementById('fullscreenControl');
+
+    if (!video) return;
+
+    // Play/Pause
+    playPauseControl.addEventListener('click', () => {
+        if (video.paused) {
+            video.play();
+            playPauseControl.querySelector('i').className = 'fas fa-pause';
+        } else {
+            video.pause();
+            playPauseControl.querySelector('i').className = 'fas fa-play';
+        }
+    });
+
+    // Progress bar
+    video.addEventListener('timeupdate', () => {
+        const percent = (video.currentTime / video.duration) * 100;
+        progressBar.style.width = percent + '%';
+
+        // Update time display
+        const currentMin = Math.floor(video.currentTime / 60);
+        const currentSec = Math.floor(video.currentTime % 60);
+        const durationMin = Math.floor(video.duration / 60);
+        const durationSec = Math.floor(video.duration % 60);
+        timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${durationMin}:${durationSec.toString().padStart(2, '0')}`;
+    });
+
+    // Click on progress bar
+    progressContainer.addEventListener('click', (e) => {
+        const rect = progressContainer.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        video.currentTime = percent * video.duration;
+    });
+
+    // Volume
+    volumeControl.addEventListener('click', () => {
+        if (video.muted) {
+            video.muted = false;
+            volumeControl.querySelector('i').className = 'fas fa-volume-up';
+            volumeSlider.value = video.volume * 100;
+        } else {
+            video.muted = true;
+            volumeControl.querySelector('i').className = 'fas fa-volume-mute';
+        }
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+        video.volume = e.target.value / 100;
+        video.muted = false;
+        if (video.volume === 0) {
+            volumeControl.querySelector('i').className = 'fas fa-volume-mute';
+        } else {
+            volumeControl.querySelector('i').className = 'fas fa-volume-up';
+        }
+    });
+
+    // Fullscreen
+    fullscreenControl.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            video.requestFullscreen();
+            fullscreenControl.querySelector('i').className = 'fas fa-compress';
+        } else {
+            document.exitFullscreen();
+            fullscreenControl.querySelector('i').className = 'fas fa-expand';
+        }
+    });
+
+    // Video ended
+    video.addEventListener('ended', () => {
+        playPauseControl.querySelector('i').className = 'fas fa-play';
+    });
+}
