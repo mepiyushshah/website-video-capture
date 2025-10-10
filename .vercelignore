@@ -1,0 +1,7 @@
+node_modules/.cache
+captures/*.mp4
+captures/*.webm
+captures/*.png
+.git
+.DS_Store
+*.log

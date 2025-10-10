@@ -6,9 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "serve": "python3 -m http.server 3000",
-    "capture": "node capture.js"
+    "capture": "node capture.js",
+    "postinstall": "node -e \"if (process.env.VERCEL) { console.log('Skipping Playwright install on Vercel') } else { require('child_process').execSync('npx playwright install chromium') }\""
   },
   "dependencies": {
+    "playwright-core": "^1.40.0",
     "playwright": "^1.40.0",
     "express": "^4.18.2"
   },
