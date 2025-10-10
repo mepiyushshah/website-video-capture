@@ -1254,9 +1254,26 @@ function initializeVideoEditor() {
     const gradientPresets = document.querySelectorAll('.gradient-preset');
     gradientPresets.forEach(preset => {
         preset.addEventListener('click', () => {
-            const bg = preset.style.background;
-            if (videoWrapper) {
-                videoWrapper.style.background = bg;
+            // Get colors from data attributes
+            const color1 = preset.getAttribute('data-color1');
+            const color2 = preset.getAttribute('data-color2');
+
+            if (color1 && color2 && gradientColor1 && gradientColor2) {
+                // Update the color inputs
+                gradientColor1.value = color1;
+                gradientColor2.value = color2;
+
+                // Update the color code display
+                const colorCode1 = gradientColor1.nextElementSibling;
+                const colorCode2 = gradientColor2.nextElementSibling;
+                if (colorCode1) colorCode1.textContent = color1;
+                if (colorCode2) colorCode2.textContent = color2;
+
+                // Apply the gradient to video wrapper
+                if (videoWrapper) {
+                    const gradient = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+                    videoWrapper.style.background = gradient;
+                }
             }
         });
     });
