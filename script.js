@@ -544,16 +544,24 @@ function showLoadingState(websiteUrl) {
         sidebar.style.display = 'none';
     }
 
-    // Show recording indicator with enhanced details
-    const recordingIndicator = document.getElementById('recordingIndicator');
-    if (recordingIndicator) {
-        recordingIndicator.style.display = 'flex';
-        recordingIndicator.innerHTML = `
-            <div class="recording-pulse"></div>
-            <i class="fas fa-record-vinyl"></i>
-            <div class="recording-details">
-                <span class="recording-title">RECORDING IN PROGRESS</span>
-                <span class="recording-url">${websiteUrl || 'Preparing...'}</span>
+    // Transform the Start Capture button to show recording status with progress
+    const captureBtn = document.querySelector('.capture-btn');
+    if (captureBtn) {
+        captureBtn.disabled = true;
+        captureBtn.style.position = 'relative';
+        captureBtn.style.overflow = 'hidden';
+        captureBtn.style.background = '#dc2626';
+        captureBtn.style.cursor = 'not-allowed';
+        captureBtn.style.minWidth = '280px';
+        captureBtn.style.height = '60px';
+        captureBtn.innerHTML = `
+            <div style="position: absolute; left: 0; top: 0; height: 100%; background: rgba(0,0,0,0.3); width: 0%; transition: width 0.5s ease;" id="captureBtnProgress"></div>
+            <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div class="recording-pulse" style="width: 8px; height: 8px;"></div>
+                    <span style="font-weight: 600; font-size: 15px;">Sit back & relax</span>
+                </div>
+                <span style="font-size: 12px; opacity: 0.9;" id="captureProgress">0% complete</span>
             </div>
         `;
     }
@@ -625,10 +633,13 @@ function hideLoadingState() {
         sidebar.style.display = 'flex';
     }
 
-    // Hide recording indicator
-    const recordingIndicator = document.getElementById('recordingIndicator');
-    if (recordingIndicator) {
-        recordingIndicator.style.display = 'none';
+    // Reset the Start Capture button to its original state
+    const captureBtn = document.querySelector('.capture-btn');
+    if (captureBtn) {
+        captureBtn.disabled = false;
+        captureBtn.style.background = '';
+        captureBtn.style.cursor = '';
+        captureBtn.innerHTML = '<span>Start Capture</span>';
     }
 
     const statusPanel = document.getElementById('statusPanel');
@@ -653,6 +664,14 @@ function updateProgress(percentage, stepTitle, stepDetail, stepNumber = 1) {
     if (progressFill && progressText) {
         progressFill.style.width = `${percentage}%`;
         progressText.textContent = `${Math.round(percentage)}%`;
+    }
+
+    // Update the capture button progress
+    const captureBtnProgress = document.getElementById('captureBtnProgress');
+    const captureProgressText = document.getElementById('captureProgress');
+    if (captureBtnProgress && captureProgressText) {
+        captureBtnProgress.style.width = `${percentage}%`;
+        captureProgressText.textContent = `${Math.round(percentage)}% complete`;
     }
 
     // Update current step
