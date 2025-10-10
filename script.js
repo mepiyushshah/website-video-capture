@@ -1420,7 +1420,28 @@ async function renderVideo() {
     // Show progress
     renderBtn.disabled = true;
     renderProgress.style.display = 'block';
-    renderProgressFill.style.width = '30%';
+    renderProgressFill.style.width = '0%';
+
+    // Start render time tracking for realistic progress
+    let renderStartTime = Date.now();
+    let renderProgressInterval = setInterval(() => {
+        const elapsed = Date.now() - renderStartTime;
+        let progress = 0;
+
+        // Simulate realistic rendering progress
+        if (elapsed < 2000) {
+            // First 2 seconds: Initial setup (0-20%)
+            progress = (elapsed / 2000) * 20;
+        } else if (elapsed < 8000) {
+            // Next 6 seconds: Main rendering (20-80%)
+            progress = 20 + ((elapsed - 2000) / 6000) * 60;
+        } else {
+            // After 8 seconds: Finalizing (80-95%)
+            progress = 80 + ((elapsed - 8000) / 2000) * 15;
+        }
+
+        renderProgressFill.style.width = `${Math.min(progress, 95)}%`;
+    }, 100);
 
     try {
         const response = await fetch('/api/render', {
@@ -1437,6 +1458,11 @@ async function renderVideo() {
 
         const data = await response.json();
 
+        // Clear the progress interval
+        if (renderProgressInterval) {
+            clearInterval(renderProgressInterval);
+        }
+
         if (response.ok) {
             renderProgressFill.style.width = '100%';
 
@@ -1448,17 +1474,42 @@ async function renderVideo() {
             downloadLink.click();
             document.body.removeChild(downloadLink);
 
+            // Trigger confetti celebration
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Change button to "Download Complete" with success styling
+            renderBtn.style.background = '#10b981';
+            renderBtn.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>Download Complete!</span>
+            `;
+
             setTimeout(() => {
                 renderProgress.style.display = 'none';
                 renderProgressFill.style.width = '0%';
+
+                // Reset button to original state after 3 seconds
+                renderBtn.style.background = '';
+                renderBtn.innerHTML = `
+                    <i class="fas fa-download"></i>
+                    <span>Export with Background</span>
+                `;
                 renderBtn.disabled = false;
-            }, 1000);
+            }, 3000);
 
             console.log('✅ Video rendered successfully:', data.filename);
         } else {
             throw new Error(data.error || 'Render failed');
         }
     } catch (error) {
+        // Clear the progress interval on error
+        if (renderProgressInterval) {
+            clearInterval(renderProgressInterval);
+        }
         console.error('Render error:', error);
         alert('Failed to render video: ' + error.message);
         renderProgress.style.display = 'none';
