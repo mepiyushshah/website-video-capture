@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeVideoPlayer();
     setupEventListeners();
     loadVideoList();
-    ensureSidebarVisible();
+    // Don't show sidebar initially - it will appear after first capture
     console.log('✅ Application initialized successfully');
 });
 
@@ -538,6 +538,12 @@ async function startCaptureProcess() {
 }
 
 function showLoadingState(websiteUrl) {
+    // Hide the sidebar during capture for better UX
+    const sidebar = document.getElementById('mainSidebar');
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+
     // Show recording indicator with enhanced details
     const recordingIndicator = document.getElementById('recordingIndicator');
     if (recordingIndicator) {
@@ -613,6 +619,12 @@ function showLoadingState(websiteUrl) {
 }
 
 function hideLoadingState() {
+    // Show the sidebar after capture completes
+    const sidebar = document.getElementById('mainSidebar');
+    if (sidebar) {
+        sidebar.style.display = 'flex';
+    }
+
     // Hide recording indicator
     const recordingIndicator = document.getElementById('recordingIndicator');
     if (recordingIndicator) {
