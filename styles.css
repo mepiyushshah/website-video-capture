@@ -1528,8 +1528,9 @@ h3 sup {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 12px;
     display: block;
+    position: relative;
+    z-index: 1;
 }
 
 /* Custom Video Controls */
@@ -2357,4 +2358,122 @@ input[type="checkbox"] {
     .video-frame {
         max-width: 100%;
     }
+}
+
+/* Mockup Styles */
+.mockup-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.mockup-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: #1a1a1a;
+    border: 2px solid #2d2d2d;
+    border-radius: 8px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mockup-btn i {
+    font-size: 20px;
+}
+
+.mockup-btn:hover {
+    background: #2d2d2d;
+    border-color: #4a9eff;
+    color: #fff;
+}
+
+.mockup-btn.active {
+    background: rgba(74, 158, 255, 0.1);
+    border-color: #4a9eff;
+    color: #4a9eff;
+}
+
+/* Browser Mockup Frames */
+.browser-mockup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    background: transparent;
+}
+
+/* Chrome Mockup */
+.chrome-mockup {
+    border: 1px solid #3c4043;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.chrome-mockup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, #e8eaed 0%, #dadce0 100%);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #c1c3c7;
+}
+
+.chrome-mockup::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    width: 12px;
+    height: 12px;
+    background: #ff5f56;
+    border-radius: 50%;
+    box-shadow:
+        18px 0 0 #ffbd2e,
+        36px 0 0 #27c93f;
+}
+
+/* Safari Mockup */
+.safari-mockup {
+    border: 1px solid #d1d1d6;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.safari-mockup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background: linear-gradient(to bottom, #f6f6f6 0%, #ececec 100%);
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #d1d1d6;
+}
+
+.safari-mockup::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    width: 12px;
+    height: 12px;
+    background: #ff5f57;
+    border-radius: 50%;
+    box-shadow:
+        20px 0 0 #febc2e,
+        40px 0 0 #28c840;
 }

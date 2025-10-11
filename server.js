@@ -118,7 +118,7 @@ app.delete('/api/videos/:filename', (req, res) => {
 
 // API endpoint to render video with background
 app.post('/api/render', async (req, res) => {
-    const { filename, background, padding } = req.body;
+    const { filename, background, padding, mockup } = req.body;
 
     if (!filename || !background) {
         return res.status(400).json({ error: 'Filename and background are required' });
@@ -131,14 +131,14 @@ app.post('/api/render', async (req, res) => {
             return res.status(404).json({ error: 'Video not found' });
         }
 
-        console.log(`🎨 Rendering video with background: ${filename}`, { background, padding });
+        console.log(`🎨 Rendering video with background: ${filename}`, { background, padding, mockup });
 
         // Generate output filename
         const outputFilename = filename.replace('.mp4', '_rendered.mp4');
         const outputPath = path.join(__dirname, 'captures', outputFilename);
 
-        // Render video with background
-        await renderVideoWithBackground(inputPath, outputPath, background, padding || 40);
+        // Render video with background and mockup
+        await renderVideoWithBackground(inputPath, outputPath, background, padding || 40, mockup || 'none');
 
         res.json({
             success: true,
@@ -153,9 +153,9 @@ app.post('/api/render', async (req, res) => {
     }
 });
 
-async function renderVideoWithBackground(inputPath, outputPath, background, padding = 40) {
+async function renderVideoWithBackground(inputPath, outputPath, background, padding = 40, mockup = 'none') {
     return new Promise((resolve, reject) => {
-        console.log('🎬 Starting FFmpeg render...', { background, padding });
+        console.log('🎬 Starting FFmpeg render...', { background, padding, mockup });
 
         // Get video dimensions and duration first
         const probeProcess = spawn('ffprobe', [
@@ -184,6 +184,11 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             const outputWidth = 1920;
             const outputHeight = 1080;
 
+            // Calculate mockup bar height
+            const mockupBarHeight = mockup === 'chrome' ? 40 : mockup === 'safari' ? 44 : 0;
+            const effectivePadding = mockup !== 'none' ? padding : padding;
+            const videoContentHeight = mockup !== 'none' ? outputHeight - mockupBarHeight - effectivePadding * 2 : outputHeight - effectivePadding * 2;
+
             let ffmpegArgs = [];
 
             if (background.type === 'gradient') {
@@ -192,14 +197,32 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 console.log('🎨 Gradient colors:', colors);
 
                 // Create gradient using geq filter
+                let filterComplex = `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];` +
+                    `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
+
+                if (mockup !== 'none') {
+                    // Add mockup bar
+                    const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
+                    const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
+                    const buttonY = mockup === 'chrome' ? 10 : 14;
+                    const videoYPos = mockupBarHeight + padding;
+
+                    filterComplex += `[bg]drawbox=x=0:y=0:w=${outputWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+                    // Add traffic lights (close, minimize, maximize buttons)
+                    filterComplex += `[bg_with_bar]drawbox=x=16:y=${buttonY}:w=12:h=12:color=0xff5f56:t=fill,` +
+                        `drawbox=x=34:y=${buttonY}:w=12:h=12:color=0xffbd2e:t=fill,` +
+                        `drawbox=x=52:y=${buttonY}:w=12:h=12:color=${buttonColor}:t=fill[bg_final];` +
+                        `[bg_final][scaled]overlay=(W-w)/2:${videoYPos}[outv]`;
+                } else {
+                    filterComplex += `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
+                }
+
                 ffmpegArgs = [
                     '-i', inputPath,
                     '-f', 'lavfi', '-i', `color=c=${colors[0]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
                     '-f', 'lavfi', '-i', `color=c=${colors[1]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
                     '-filter_complex',
-                    `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];` +
-                    `[0:v]scale=w=${outputWidth-padding*2}:h=${outputHeight-padding*2}:force_original_aspect_ratio=decrease[scaled];` +
-                    `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`,
+                    filterComplex,
                     '-map', '[outv]',
                     '-map', '0:a?',
                     '-c:v', 'libx264',
@@ -215,12 +238,30 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 const color = parseBackgroundColor(background);
                 console.log('🎨 Solid color:', color);
 
+                let filterComplex = `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
+
+                if (mockup !== 'none') {
+                    // Add mockup bar
+                    const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
+                    const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
+                    const buttonY = mockup === 'chrome' ? 10 : 14;
+                    const videoYPos = mockupBarHeight + padding;
+
+                    filterComplex += `[1:v]drawbox=x=0:y=0:w=${outputWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+                    // Add traffic lights
+                    filterComplex += `[bg_with_bar]drawbox=x=16:y=${buttonY}:w=12:h=12:color=0xff5f56:t=fill,` +
+                        `drawbox=x=34:y=${buttonY}:w=12:h=12:color=0xffbd2e:t=fill,` +
+                        `drawbox=x=52:y=${buttonY}:w=12:h=12:color=${buttonColor}:t=fill[bg_final];` +
+                        `[bg_final][scaled]overlay=(W-w)/2:${videoYPos}[outv]`;
+                } else {
+                    filterComplex += `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
+                }
+
                 ffmpegArgs = [
                     '-i', inputPath,
                     '-f', 'lavfi', '-i', `color=c=${color}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
                     '-filter_complex',
-                    `[0:v]scale=w=${outputWidth-padding*2}:h=${outputHeight-padding*2}:force_original_aspect_ratio=decrease[scaled];` +
-                    `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`,
+                    filterComplex,
                     '-map', '[outv]',
                     '-map', '0:a?',
                     '-c:v', 'libx264',

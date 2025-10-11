@@ -1231,6 +1231,9 @@ function initializeVideoEditor() {
     const videoPlayer = document.getElementById('mainVideo');
     const videoWrapper = document.getElementById('videoWrapper');
 
+    // Initialize mockup handlers
+    initializeMockupHandlers();
+
     // Background tab switching
     const bgTabs = document.querySelectorAll('.bg-tab');
     const gradientSection = document.getElementById('gradientSection');
@@ -1403,11 +1406,11 @@ async function renderVideo() {
         }
     } else if (activeType === 'color') {
         // Get solid color
-        const bgColor = document.getElementById('bgColor');
-        if (bgColor) {
+        const bgColorInput = document.getElementById('bgColorInput');
+        if (bgColorInput) {
             background.type = 'solid';
-            background.value = bgColor.value;
-            console.log('Solid color:', bgColor.value);
+            background.value = bgColorInput.value;
+            console.log('Solid color:', bgColorInput.value);
         }
     }
 
@@ -1415,7 +1418,10 @@ async function renderVideo() {
     const paddingSlider = document.getElementById('paddingSlider');
     const padding = paddingSlider ? parseInt(paddingSlider.value) : 40;
 
-    console.log('Rendering video with background:', background, 'padding:', padding);
+    // Get current mockup
+    const mockup = getCurrentMockup();
+
+    console.log('Rendering video with background:', background, 'padding:', padding, 'mockup:', mockup);
 
     // Show progress
     renderBtn.disabled = true;
@@ -1452,7 +1458,8 @@ async function renderVideo() {
             body: JSON.stringify({
                 filename: filename,
                 background: background,
-                padding: padding
+                padding: padding,
+                mockup: mockup
             })
         });
 
@@ -1608,3 +1615,76 @@ function setupCustomVideoControls() {
         playPauseControl.querySelector('i').className = 'fas fa-play';
     });
 }
+
+// Mockup Handler Functions
+let currentMockup = 'none';
+
+function initializeMockupHandlers() {
+    const mockupButtons = document.querySelectorAll('.mockup-btn');
+    const videoWrapper = document.getElementById('videoWrapper');
+
+    mockupButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const mockupType = this.getAttribute('data-mockup');
+
+            // Remove active class from all buttons
+            mockupButtons.forEach(b => b.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Apply mockup
+            applyMockup(mockupType);
+
+            // Store current mockup selection
+            currentMockup = mockupType;
+        });
+    });
+
+    // Set default to "none" active
+    const noneBtn = document.querySelector('.mockup-btn[data-mockup="none"]');
+    if (noneBtn) {
+        noneBtn.classList.add('active');
+    }
+}
+
+function applyMockup(mockupType) {
+    const videoWrapper = document.getElementById('videoWrapper');
+
+    // Remove existing mockup elements
+    const existingMockup = videoWrapper.querySelector('.browser-mockup');
+    if (existingMockup) {
+        existingMockup.remove();
+    }
+
+    // Remove mockup classes
+    videoWrapper.classList.remove('has-mockup', 'chrome', 'safari');
+
+    if (mockupType === 'none') {
+        return;
+    }
+
+    // Add mockup wrapper class
+    videoWrapper.classList.add('has-mockup');
+
+    // Create mockup element
+    const mockupDiv = document.createElement('div');
+    mockupDiv.className = 'browser-mockup';
+
+    if (mockupType === 'chrome') {
+        mockupDiv.classList.add('chrome-mockup');
+        videoWrapper.classList.add('chrome');
+    } else if (mockupType === 'safari') {
+        mockupDiv.classList.add('safari-mockup');
+        videoWrapper.classList.add('safari');
+    }
+
+    videoWrapper.appendChild(mockupDiv);
+}
+
+function getCurrentMockup() {
+    return currentMockup;
+}
+
+// Export function
+window.getCurrentMockup = getCurrentMockup;
