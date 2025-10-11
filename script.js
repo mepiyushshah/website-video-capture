@@ -1650,22 +1650,33 @@ function initializeMockupHandlers() {
 
 function applyMockup(mockupType) {
     const videoWrapper = document.getElementById('videoWrapper');
+    const mainVideo = document.getElementById('mainVideo');
 
-    // Remove existing mockup elements
-    const existingMockup = videoWrapper.querySelector('.browser-mockup');
-    if (existingMockup) {
-        existingMockup.remove();
+    // Remove existing mockup container
+    const existingContainer = videoWrapper.querySelector('.video-mockup-container');
+    if (existingContainer) {
+        // Move video back to wrapper before removing container
+        const videoElement = existingContainer.querySelector('#mainVideo');
+        if (videoElement) {
+            videoWrapper.insertBefore(videoElement, videoWrapper.firstChild);
+        }
+        existingContainer.remove();
     }
-
-    // Remove mockup classes
-    videoWrapper.classList.remove('has-mockup', 'chrome', 'safari');
 
     if (mockupType === 'none') {
         return;
     }
 
-    // Add mockup wrapper class
-    videoWrapper.classList.add('has-mockup');
+    // Create mockup container
+    const mockupContainer = document.createElement('div');
+    mockupContainer.className = 'video-mockup-container';
+
+    // Add browser-specific class
+    if (mockupType === 'chrome') {
+        mockupContainer.classList.add('chrome');
+    } else if (mockupType === 'safari') {
+        mockupContainer.classList.add('safari');
+    }
 
     // Create mockup element
     const mockupDiv = document.createElement('div');
@@ -1673,13 +1684,16 @@ function applyMockup(mockupType) {
 
     if (mockupType === 'chrome') {
         mockupDiv.classList.add('chrome-mockup');
-        videoWrapper.classList.add('chrome');
     } else if (mockupType === 'safari') {
         mockupDiv.classList.add('safari-mockup');
-        videoWrapper.classList.add('safari');
     }
 
-    videoWrapper.appendChild(mockupDiv);
+    // Move video into mockup container
+    mockupContainer.appendChild(mainVideo);
+    mockupContainer.appendChild(mockupDiv);
+
+    // Add mockup container to wrapper at the beginning
+    videoWrapper.insertBefore(mockupContainer, videoWrapper.firstChild);
 }
 
 function getCurrentMockup() {

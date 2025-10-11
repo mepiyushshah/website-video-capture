@@ -2401,6 +2401,12 @@ input[type="checkbox"] {
 }
 
 /* Browser Mockup Frames */
+.video-mockup-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
 .browser-mockup {
     position: absolute;
     top: 0;
@@ -2476,4 +2482,20 @@ input[type="checkbox"] {
     box-shadow:
         20px 0 0 #febc2e,
         40px 0 0 #28c840;
+}
+
+/* Adjust video inside mockup container */
+.video-mockup-container #mainVideo {
+    display: block;
+    border-radius: 0;
+}
+
+.video-mockup-container.chrome #mainVideo {
+    border-radius: 8px;
+    padding-top: 40px;
+}
+
+.video-mockup-container.safari #mainVideo {
+    border-radius: 12px;
+    padding-top: 44px;
 }
