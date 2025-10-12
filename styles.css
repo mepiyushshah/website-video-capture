@@ -2495,14 +2495,24 @@ input[type="checkbox"] {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     z-index: 1;
 }
 
 .video-mockup-container.chrome #mainVideo {
     border-radius: 8px;
+    top: 40px;
+    height: calc(100% - 40px);
+    object-fit: cover;
+    object-position: top center;
 }
 
 .video-mockup-container.safari #mainVideo {
     border-radius: 12px;
+    top: 44px;
+    height: calc(100% - 44px);
+    object-fit: cover;
+    object-position: top center;
 }
