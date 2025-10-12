@@ -2,16 +2,127 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const auth = require('./auth');
 
 const app = express();
 const PORT = 3000;
+
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(session({
+    secret: 'capture-studio-secret-key-' + Math.random().toString(36),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        httpOnly: true,
+        secure: false // Set to true if using HTTPS
+    }
+}));
 
 // Serve static files
 app.use(express.static('.'));
 app.use('/captures', express.static('captures'));
 
-// Parse JSON bodies
-app.use(express.json());
+// Authentication middleware
+const requireAuth = (req, res, next) => {
+    const sessionToken = req.cookies.sessionToken || req.session.token;
+
+    if (!sessionToken) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = auth.verifySession(sessionToken);
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+
+    req.user = user;
+    next();
+};
+
+// Authentication routes
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        const result = await auth.register(email, password);
+        res.json(result);
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        const result = await auth.login(email, password);
+
+        // Set session token in cookie
+        res.cookie('sessionToken', result.sessionToken, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            secure: false
+        });
+
+        req.session.token = result.sessionToken;
+
+        res.json({
+            success: true,
+            user: result.user,
+            message: 'Login successful'
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(401).json({ error: error.message });
+    }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+    try {
+        const sessionToken = req.cookies.sessionToken || req.session.token;
+
+        if (sessionToken) {
+            auth.logout(sessionToken);
+        }
+
+        res.clearCookie('sessionToken');
+        req.session.destroy();
+
+        res.json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Logout failed' });
+    }
+});
+
+app.get('/api/auth/me', (req, res) => {
+    const sessionToken = req.cookies.sessionToken || req.session.token;
+
+    if (!sessionToken) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const user = auth.verifySession(sessionToken);
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+
+    res.json({ user });
+});
 
 // API endpoint to start video capture
 app.post('/api/capture', async (req, res) => {
@@ -356,9 +467,21 @@ function parseGradientColors(gradientString) {
     return ['0x1a1a1a', '0x2a2a2a'];
 }
 
-// Serve the main page
+// Serve the main page (protected)
 app.get('/', (req, res) => {
+    const sessionToken = req.cookies.sessionToken || req.session.token;
+
+    // Check if user is authenticated
+    if (!sessionToken || !auth.verifySession(sessionToken)) {
+        return res.redirect('/auth.html');
+    }
+
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve auth page
+app.get('/auth.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'auth.html'));
 });
 
 // Start server

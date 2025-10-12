@@ -3,15 +3,17 @@ let isPlaying = false;
 let currentVideo = null;
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Initializing application...');
 
     // Clear any existing error messages
     clearAllMessages();
 
     // Check if user is logged in
-    if (!isLoggedIn()) {
+    const loggedIn = await isLoggedIn();
+    if (!loggedIn) {
         showLoginModal();
+        return; // Don't initialize the rest of the app if not logged in
     }
 
     initializeVideoPlayer();
@@ -1151,18 +1153,23 @@ window.updateTimeout = updateTimeout;
 window.updateBitrate = updateBitrate;
 
 // Login System Functions
-function isLoggedIn() {
-    return localStorage.getItem('userLoggedIn') === 'true';
+async function isLoggedIn() {
+    try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+            const data = await response.json();
+            updateUserInfo(data.user.email, data.user.credits);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        return false;
+    }
 }
 
 function showLoginModal() {
-    const modal = document.getElementById('loginModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
-    }
+    // Redirect to auth page instead of showing modal
+    window.location.href = '/auth.html';
 }
 
 function closeLoginModal() {
@@ -1175,47 +1182,67 @@ function closeLoginModal() {
     }
 }
 
-function handleLogin() {
+async function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
-    
+
     if (!email || !password) {
         showMessage('Please fill in all fields', 'error');
         return;
     }
-    
-    // Simple authentication (in real app, this would be server-side)
-    // Accept any email/password for demo purposes
-    // Set login status
-    localStorage.setItem('userLoggedIn', 'true');
-    localStorage.setItem('userEmail', email);
 
-    if (rememberMe) {
-        localStorage.setItem('rememberUser', 'true');
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showMessage('Login successful! Welcome to CaptureStudio', 'success');
+            closeLoginModal();
+
+            // Update user info in header
+            updateUserInfo(data.user.email, data.user.credits);
+        } else {
+            showMessage(data.error || 'Login failed', 'error');
+        }
+    } catch (error) {
+        showMessage('Network error. Please try again.', 'error');
     }
-
-    showMessage('Login successful! Welcome to CaptureStudio', 'success');
-    closeLoginModal();
-
-    // Update user info in header
-    updateUserInfo(email);
 }
 
-function updateUserInfo(email) {
+function updateUserInfo(email, credits) {
     const userEmailElement = document.querySelector('.user-email');
+    const userCreditsElement = document.querySelector('.user-credits');
+
     if (userEmailElement) {
         userEmailElement.textContent = email;
     }
+    if (userCreditsElement && credits !== undefined) {
+        userCreditsElement.textContent = `${credits} credits`;
+    }
 }
 
-function logout() {
-    localStorage.removeItem('userLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('rememberUser');
-    
-    showMessage('Logged out successfully', 'info');
-    showLoginModal();
+async function logout() {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            showMessage('Logged out successfully', 'info');
+            // Redirect to auth page
+            window.location.href = '/auth.html';
+        }
+    } catch (error) {
+        showMessage('Logout failed', 'error');
+    }
 }
 
 // Add logout functionality to logout button
