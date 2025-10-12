@@ -1691,12 +1691,16 @@ function applyMockup(mockupType) {
     }
 
     if (mockupType === 'none') {
+        // Reset video styles when no mockup
+        mainVideo.style.borderRadius = '0';
+        mainVideo.style.paddingTop = '0';
         return;
     }
 
-    // Create mockup container
+    // Create mockup container (this will hold the video with black background)
     const mockupContainer = document.createElement('div');
     mockupContainer.className = 'video-mockup-container';
+    mockupContainer.style.background = '#000000'; // Black background inside mockup
 
     // Add browser-specific class
     if (mockupType === 'chrome') {
@@ -1705,7 +1709,7 @@ function applyMockup(mockupType) {
         mockupContainer.classList.add('safari');
     }
 
-    // Create mockup element
+    // Create mockup element (the browser frame overlay)
     const mockupDiv = document.createElement('div');
     mockupDiv.className = 'browser-mockup';
 
