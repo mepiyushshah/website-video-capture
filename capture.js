@@ -71,107 +71,148 @@ class WebsiteVideoCapture {
         timeout: timeout
       });
 
-      // Wait for dynamic content to load
+      // Wait for initial content to load and lazy-loaded images
       const waitTime = (this.settings.waitTime || 5) * 1000;
       await this.page.waitForTimeout(waitTime);
+
+      // AGGRESSIVELY remove popups, cookie banners, and modals
+      await this.page.evaluate(() => {
+        // Remove ALL fixed and absolute positioned elements that might block
+        const removeOverlays = () => {
+          document.querySelectorAll('*').forEach(el => {
+            const style = window.getComputedStyle(el);
+            const position = style.position;
+
+            // Remove fixed/absolute elements that are large overlays
+            if (position === 'fixed' || position === 'absolute') {
+              const zIndex = parseInt(style.zIndex) || 0;
+              const height = el.offsetHeight;
+              const width = el.offsetWidth;
+
+              // If it's a large overlay with high z-index, remove it
+              if (zIndex > 100 && (height > 200 || width > 300)) {
+                el.remove();
+              }
+            }
+          });
+
+          // Force body to be scrollable
+          document.body.style.overflow = 'auto !important';
+          document.documentElement.style.overflow = 'auto !important';
+
+          // Remove modal backdrops
+          document.querySelectorAll('[class*="modal" i], [class*="overlay" i], [class*="backdrop" i]').forEach(el => {
+            const style = window.getComputedStyle(el);
+            if (style.position === 'fixed' || style.position === 'absolute') {
+              el.remove();
+            }
+          });
+        };
+
+        removeOverlays();
+
+        // Run again after a short delay in case modals appeared
+        setTimeout(removeOverlays, 500);
+      });
+
+      // Wait a bit for any animations after dismissing popups
+      await this.page.waitForTimeout(1000);
 
       // Take a screenshot for thumbnail
       const screenshotPath = path.join(this.outputDir, outputFilename.replace('.mp4', '_thumb.png'));
       await this.page.screenshot({
         path: screenshotPath,
+        type: 'png',
         fullPage: false,
         clip: { x: 0, y: 0, width: 1280, height: 720 }
       });
       console.log(`📸 Screenshot saved: ${screenshotPath}`);
 
-      console.log('🔄 Loading full page content...');
-
-      // Step 1: Scroll to bottom multiple times to load ALL content
-      let previousHeight = 0;
-      let currentHeight = await this.page.evaluate(() => document.documentElement.scrollHeight);
-      let attempts = 0;
-      const maxAttempts = 20;
-
-      while (previousHeight !== currentHeight && attempts < maxAttempts) {
-        previousHeight = currentHeight;
-
-        // Scroll to bottom
-        await this.page.evaluate(() => {
-          window.scrollTo(0, document.documentElement.scrollHeight);
-        });
-
-        // Wait for content to load
-        await this.page.waitForTimeout(1000);
-
-        // Get new height
-        currentHeight = await this.page.evaluate(() => document.documentElement.scrollHeight);
-        attempts++;
-      }
-
-      console.log(`📏 Full page loaded: ${currentHeight}px (after ${attempts} attempts)`);
-
-      // Step 2: Go back to top
+      // Start at the very top
       await this.page.evaluate(() => window.scrollTo(0, 0));
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(500);
 
-      // Step 3: Calculate how much to scroll
-      const pageInfo = await this.page.evaluate(() => {
-        const totalHeight = document.documentElement.scrollHeight;
-        const viewportHeight = window.innerHeight;
-        const maxScroll = totalHeight - viewportHeight;
+      console.log('🎯 Starting perfect continuous smooth scroll...');
 
-        return { totalHeight, viewportHeight, maxScroll };
+      // PERFECT SCROLL LOGIC - Continuous smooth scrolling until bottom
+      const scrollResult = await this.page.evaluate(async () => {
+        return new Promise((resolve) => {
+          const SCROLL_SPEED = 500; // pixels per second (comfortable viewing speed)
+          const FPS = 60; // 60 frames per second for ultra smooth
+          const FRAME_TIME = 1000 / FPS; // milliseconds per frame
+          const PIXELS_PER_FRAME = SCROLL_SPEED / FPS; // how much to scroll each frame
+
+          let scrollCount = 0;
+          let lastScrollY = window.scrollY;
+          let stuckCount = 0;
+          const MAX_STUCK = 60; // If stuck for 60 frames (1 second), we're at bottom
+
+          const startTime = Date.now();
+
+          function scrollStep() {
+            const currentScrollY = window.scrollY;
+            const currentPageHeight = document.documentElement.scrollHeight;
+            const viewportHeight = window.innerHeight;
+            const maxScrollY = currentPageHeight - viewportHeight;
+
+            // Check if scroll position hasn't changed
+            if (currentScrollY === lastScrollY) {
+              stuckCount++;
+
+              // Only stop if we're truly stuck for long enough AND at bottom
+              if (stuckCount >= MAX_STUCK) {
+                // Double-check we're really at bottom
+                const distanceFromBottom = currentPageHeight - (currentScrollY + viewportHeight);
+
+                if (distanceFromBottom <= 10) {
+                  // Confirmed: stuck for 1 second AND within 10px of bottom
+                  const totalTime = (Date.now() - startTime) / 1000;
+                  resolve({
+                    totalScrolled: currentScrollY,
+                    duration: totalTime,
+                    frames: scrollCount
+                  });
+                  return;
+                } else if (stuckCount >= MAX_STUCK * 5) {
+                  // Stuck for 5 seconds but not at bottom - something's wrong, stop anyway
+                  const totalTime = (Date.now() - startTime) / 1000;
+                  resolve({
+                    totalScrolled: currentScrollY,
+                    duration: totalTime,
+                    frames: scrollCount
+                  });
+                  return;
+                }
+              }
+            } else {
+              stuckCount = 0; // Reset stuck counter if we moved
+            }
+
+            lastScrollY = currentScrollY;
+
+            // Scroll down by calculated pixels
+            window.scrollBy({
+              top: PIXELS_PER_FRAME,
+              left: 0,
+              behavior: 'auto' // Instant, no smooth (we control smoothness)
+            });
+
+            scrollCount++;
+
+            // Continue scrolling
+            setTimeout(scrollStep, FRAME_TIME);
+          }
+
+          // Start the scroll loop
+          scrollStep();
+        });
       });
 
-      console.log(`📐 Total: ${pageInfo.totalHeight}px, Viewport: ${pageInfo.viewportHeight}px, Will scroll: ${pageInfo.maxScroll}px`);
+      console.log(`✅ Scroll completed!`);
+      console.log(`📊 Stats: ${scrollResult.totalScrolled}px scrolled in ${scrollResult.duration.toFixed(1)}s (${scrollResult.frames} frames)`);
 
-      // Step 4: Calculate scroll duration
-      let scrollDuration;
-      if (this.settings.scrollDuration && this.settings.scrollDuration > 0) {
-        scrollDuration = this.settings.scrollDuration * 1000;
-      } else {
-        // 2 seconds per viewport height
-        const viewportCount = Math.ceil(pageInfo.maxScroll / pageInfo.viewportHeight);
-        scrollDuration = Math.max(10000, viewportCount * 2000);
-      }
-
-      console.log(`⏱️  Scroll duration: ${scrollDuration / 1000}s`);
-      console.log('🎬 Recording smooth scroll from header to footer...');
-
-      // Step 5: Scroll in small steps with proper timing for video capture
-      // Use 100ms per step for reliable video capture at 25fps (Playwright default)
-      const stepDelay = 100;
-      const totalSteps = Math.ceil(scrollDuration / stepDelay);
-      const pixelsPerStep = pageInfo.maxScroll / totalSteps;
-
-      console.log(`📊 Scrolling ${totalSteps} steps, ${pixelsPerStep.toFixed(2)}px per step`);
-
-      for (let step = 0; step <= totalSteps; step++) {
-        const targetScroll = Math.min(Math.round(step * pixelsPerStep), pageInfo.maxScroll);
-
-        await this.page.evaluate((scrollY) => {
-          window.scrollTo(0, scrollY);
-        }, targetScroll);
-
-        // Wait for video frame to be captured + content to render
-        await this.page.waitForTimeout(stepDelay);
-
-        // Progress indicator
-        if (step % 50 === 0) {
-          const progress = ((step / totalSteps) * 100).toFixed(1);
-          console.log(`📹 Progress: ${progress}%`);
-        }
-      }
-
-      // Ensure we're at the exact bottom
-      await this.page.evaluate((maxScroll) => {
-        window.scrollTo(0, maxScroll);
-      }, pageInfo.maxScroll);
-
-      console.log('📹 Progress: 100% - Reached footer!');
-
-      // Wait at footer
-      await this.page.waitForTimeout(2000);
+      // Small pause at the end
+      await this.page.waitForTimeout(500);
 
       console.log('✅ Video capture completed!');
 
@@ -199,7 +240,7 @@ class WebsiteVideoCapture {
 
       // Convert WebM to MP4 and add audio in one step
       const finalPath = path.join(this.outputDir, outputFilename);
-      const scrollDurationSec = scrollDuration / 1000;
+      const scrollDurationSec = scrollResult.duration; // Use actual duration from scroll
 
       console.log(`🎥 Converting video and adding audio...`);
       await this.convertAndAddAudio(videoPath, finalPath, scrollDurationSec);
