@@ -187,19 +187,39 @@ function formatTime(seconds) {
 
 function loadVideo(fileName) {
     const videoPath = `captures/${fileName}`;
-    
+
     if (currentVideo) {
         currentVideo.src = videoPath;
         currentVideo.load();
-        
+
         // Hide placeholder and show video
         const videoPlaceholder = document.getElementById('videoPlaceholder');
         videoPlaceholder.style.display = 'none';
         currentVideo.style.display = 'block';
-        
+
+        // Show video controls and info when video is loaded
+        const videoHeaderControls = document.getElementById('videoHeaderControls');
+        const videoInfoSection = document.getElementById('videoInfoSection');
+        if (videoHeaderControls) {
+            videoHeaderControls.style.display = 'flex';
+        }
+        if (videoInfoSection) {
+            videoInfoSection.style.display = 'flex';
+        }
+
+        // Show Preview and Design tabs when video is loaded
+        const previewTab = document.getElementById('previewTab');
+        const designTab = document.getElementById('designTab');
+        if (previewTab) {
+            previewTab.style.display = 'flex';
+        }
+        if (designTab) {
+            designTab.style.display = 'flex';
+        }
+
         // Update file selection in explorer
         updateFileSelection(fileName);
-        
+
         // Reset play state
         isPlaying = false;
         updatePlayPauseButton();
