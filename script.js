@@ -197,14 +197,10 @@ function loadVideo(fileName) {
         videoPlaceholder.style.display = 'none';
         currentVideo.style.display = 'block';
 
-        // Show video controls and info when video is loaded
+        // Show video controls when video is loaded
         const videoHeaderControls = document.getElementById('videoHeaderControls');
-        const videoInfoSection = document.getElementById('videoInfoSection');
         if (videoHeaderControls) {
             videoHeaderControls.style.display = 'flex';
-        }
-        if (videoInfoSection) {
-            videoInfoSection.style.display = 'flex';
         }
 
         // Show Preview and Design tabs when video is loaded
@@ -1583,86 +1579,94 @@ window.initializeVideoEditor = initializeVideoEditor;
 window.resetPadding = resetPadding;
 window.renderVideo = renderVideo;
 
-// Custom Video Controls
+// Custom Video Controls (Timeline)
 function setupCustomVideoControls() {
     const video = document.getElementById('mainVideo');
     const playPauseControl = document.getElementById('playPauseControl');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBar = document.getElementById('progressBar');
+    const timelineTrack = document.getElementById('timelineTrack');
+    const timelineProgress = document.getElementById('timelineProgress');
+    const timelineMarker = document.getElementById('timelineMarker');
     const timeDisplay = document.getElementById('timeDisplay');
     const volumeControl = document.getElementById('volumeControl');
-    const volumeSlider = document.getElementById('volumeSlider');
     const fullscreenControl = document.getElementById('fullscreenControl');
 
     if (!video) return;
 
     // Play/Pause
-    playPauseControl.addEventListener('click', () => {
-        if (video.paused) {
-            video.play();
-            playPauseControl.querySelector('i').className = 'fas fa-pause';
-        } else {
-            video.pause();
-            playPauseControl.querySelector('i').className = 'fas fa-play';
-        }
-    });
+    if (playPauseControl) {
+        playPauseControl.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseControl.querySelector('i').className = 'fas fa-pause';
+            } else {
+                video.pause();
+                playPauseControl.querySelector('i').className = 'fas fa-play';
+            }
+        });
+    }
 
-    // Progress bar
+    // Timeline progress and marker update
     video.addEventListener('timeupdate', () => {
         const percent = (video.currentTime / video.duration) * 100;
-        progressBar.style.width = percent + '%';
+
+        if (timelineProgress) {
+            timelineProgress.style.width = percent + '%';
+        }
+
+        if (timelineMarker) {
+            timelineMarker.style.left = percent + '%';
+        }
 
         // Update time display
-        const currentMin = Math.floor(video.currentTime / 60);
-        const currentSec = Math.floor(video.currentTime % 60);
-        const durationMin = Math.floor(video.duration / 60);
-        const durationSec = Math.floor(video.duration % 60);
-        timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${durationMin}:${durationSec.toString().padStart(2, '0')}`;
-    });
-
-    // Click on progress bar
-    progressContainer.addEventListener('click', (e) => {
-        const rect = progressContainer.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
-        video.currentTime = percent * video.duration;
-    });
-
-    // Volume
-    volumeControl.addEventListener('click', () => {
-        if (video.muted) {
-            video.muted = false;
-            volumeControl.querySelector('i').className = 'fas fa-volume-up';
-            volumeSlider.value = video.volume * 100;
-        } else {
-            video.muted = true;
-            volumeControl.querySelector('i').className = 'fas fa-volume-mute';
+        if (timeDisplay) {
+            const currentMin = Math.floor(video.currentTime / 60);
+            const currentSec = Math.floor(video.currentTime % 60);
+            const durationMin = Math.floor(video.duration / 60);
+            const durationSec = Math.floor(video.duration % 60);
+            timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${durationMin}:${durationSec.toString().padStart(2, '0')}`;
         }
     });
 
-    volumeSlider.addEventListener('input', (e) => {
-        video.volume = e.target.value / 100;
-        video.muted = false;
-        if (video.volume === 0) {
-            volumeControl.querySelector('i').className = 'fas fa-volume-mute';
-        } else {
-            volumeControl.querySelector('i').className = 'fas fa-volume-up';
-        }
-    });
+    // Click on timeline track to seek
+    if (timelineTrack) {
+        timelineTrack.addEventListener('click', (e) => {
+            const rect = timelineTrack.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        });
+    }
 
-    // Fullscreen
-    fullscreenControl.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            video.requestFullscreen();
-            fullscreenControl.querySelector('i').className = 'fas fa-compress';
-        } else {
-            document.exitFullscreen();
-            fullscreenControl.querySelector('i').className = 'fas fa-expand';
-        }
-    });
+    // Volume toggle
+    if (volumeControl) {
+        volumeControl.addEventListener('click', () => {
+            if (video.muted) {
+                video.muted = false;
+                volumeControl.querySelector('i').className = 'fas fa-volume-up';
+            } else {
+                video.muted = true;
+                volumeControl.querySelector('i').className = 'fas fa-volume-mute';
+            }
+        });
+    }
+
+    // Fullscreen toggle
+    if (fullscreenControl) {
+        fullscreenControl.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                video.requestFullscreen();
+                fullscreenControl.querySelector('i').className = 'fas fa-compress';
+            } else {
+                document.exitFullscreen();
+                fullscreenControl.querySelector('i').className = 'fas fa-expand';
+            }
+        });
+    }
 
     // Video ended
     video.addEventListener('ended', () => {
-        playPauseControl.querySelector('i').className = 'fas fa-play';
+        if (playPauseControl) {
+            playPauseControl.querySelector('i').className = 'fas fa-play';
+        }
     });
 }
 

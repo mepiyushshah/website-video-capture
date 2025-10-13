@@ -405,22 +405,21 @@
                             <source src="captures/website-capture.mp4" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
-                        <div class="custom-video-controls" id="customControls">
-                            <div class="progress-container" id="progressContainer">
-                                <div class="progress-bar-video" id="progressBar"></div>
-                            </div>
-                            <div class="controls-bottom">
-                                <button class="control-icon" id="playPauseControl">
+                        <!-- Timeline Section -->
+                        <div class="video-timeline" id="videoTimeline">
+                            <div class="timeline-container">
+                                <button class="timeline-play-btn" id="playPauseControl">
                                     <i class="fas fa-play"></i>
                                 </button>
-                                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
-                                <div class="volume-control">
-                                    <button class="control-icon" id="volumeControl">
-                                        <i class="fas fa-volume-up"></i>
-                                    </button>
-                                    <input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
+                                <div class="timeline-track" id="timelineTrack">
+                                    <div class="timeline-progress" id="timelineProgress"></div>
+                                    <div class="timeline-marker" id="timelineMarker"></div>
                                 </div>
-                                <button class="control-icon" id="fullscreenControl">
+                                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                                <button class="timeline-icon-btn" id="volumeControl">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                                <button class="timeline-icon-btn" id="fullscreenControl">
                                     <i class="fas fa-expand"></i>
                                 </button>
                             </div>
@@ -439,20 +438,6 @@
                         </div>
                     </div>
                     
-                    <div class="video-info" id="videoInfoSection" style="display: none;">
-                        <div class="info-item">
-                            <span class="label">Resolution:</span>
-                            <span class="value">1280x720</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">FPS:</span>
-                            <span class="value">30</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Duration:</span>
-                            <span class="value" id="videoDuration">--:--</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
