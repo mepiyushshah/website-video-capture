@@ -1,6 +1,7 @@
 // Video Player Controls
 let isPlaying = false;
 let currentVideo = null;
+let currentMockup = 'none';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1418,7 +1419,7 @@ async function renderVideo() {
     const renderProgressFill = document.getElementById('renderProgressFill');
 
     if (!currentVideo || !currentVideo.src) {
-        alert('No video loaded');
+        showMessage('No video loaded. Please capture or load a video first.', 'error');
         return;
     }
 
@@ -1467,10 +1468,13 @@ async function renderVideo() {
     // Get current mockup
     const mockup = getCurrentMockup();
 
-    console.log('Rendering video with background:', background, 'padding:', padding, 'mockup:', mockup);
+    console.log('🎨 Starting render...', { background, padding, mockup });
+    showMessage('Starting video export with background...', 'info');
 
-    // Show progress
+    // Show progress with initial state
     renderBtn.disabled = true;
+    renderBtn.style.opacity = '0.6';
+    renderBtn.style.cursor = 'not-allowed';
     renderProgress.style.display = 'block';
     renderProgressFill.style.width = '0%';
 
@@ -1547,6 +1551,8 @@ async function renderVideo() {
 
                 // Reset button to original state after 3 seconds
                 renderBtn.style.background = '';
+                renderBtn.style.opacity = '';
+                renderBtn.style.cursor = '';
                 renderBtn.innerHTML = `
                     <i class="fas fa-download"></i>
                     <span>Export with Background</span>
@@ -1564,10 +1570,12 @@ async function renderVideo() {
             clearInterval(renderProgressInterval);
         }
         console.error('Render error:', error);
-        alert('Failed to render video: ' + error.message);
+        showMessage('Failed to render video: ' + error.message, 'error');
         renderProgress.style.display = 'none';
         renderProgressFill.style.width = '0%';
         renderBtn.disabled = false;
+        renderBtn.style.opacity = '';
+        renderBtn.style.cursor = '';
     }
 }
 
@@ -1671,8 +1679,6 @@ function setupCustomVideoControls() {
 }
 
 // Mockup Handler Functions
-let currentMockup = 'none';
-
 function initializeMockupHandlers() {
     const mockupButtons = document.querySelectorAll('.mockup-btn');
     const videoWrapper = document.getElementById('videoWrapper');

@@ -295,8 +295,8 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             const outputWidth = 1920;
             const outputHeight = 1080;
 
-            // Calculate mockup bar height
-            const mockupBarHeight = mockup === 'chrome' ? 40 : mockup === 'safari' ? 44 : 0;
+            // Calculate mockup bar height (scaled up for visibility)
+            const mockupBarHeight = mockup === 'chrome' ? 64 : mockup === 'safari' ? 70 : 0;
             const effectivePadding = mockup !== 'none' ? padding : padding;
             const videoContentHeight = mockup !== 'none' ? outputHeight - mockupBarHeight - effectivePadding * 2 : outputHeight - effectivePadding * 2;
 
@@ -312,18 +312,26 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                     `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
 
                 if (mockup !== 'none') {
-                    // Add mockup bar
+                    // Add mockup bar with proper sizing
+                    const mockupX = effectivePadding;
+                    const mockupBarWidth = outputWidth - effectivePadding * 2;
                     const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
                     const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
-                    const buttonY = mockup === 'chrome' ? 10 : 14;
-                    const videoYPos = mockupBarHeight + padding;
+                    const buttonSize = 20; // Larger buttons
+                    const buttonSpacing = 28; // Space between buttons
+                    const buttonStartX = mockupX + 24; // Start position from left
+                    const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
+                    const videoYPos = mockupBarHeight + effectivePadding;
+                    const borderRadius = 12;
 
-                    filterComplex += `[bg]drawbox=x=0:y=0:w=${outputWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
-                    // Add traffic lights (close, minimize, maximize buttons)
-                    filterComplex += `[bg_with_bar]drawbox=x=16:y=${buttonY}:w=12:h=12:color=0xff5f56:t=fill,` +
-                        `drawbox=x=34:y=${buttonY}:w=12:h=12:color=0xffbd2e:t=fill,` +
-                        `drawbox=x=52:y=${buttonY}:w=12:h=12:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=(W-w)/2:${videoYPos}[outv]`;
+                    // Draw mockup bar with rounded corners at top
+                    filterComplex += `[bg]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+
+                    // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
+                    filterComplex += `[bg_with_bar]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
+                        `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
+                        `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
+                        `[bg_final][scaled]overlay=${mockupX}:${videoYPos}[outv]`;
                 } else {
                     filterComplex += `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
                 }
@@ -352,18 +360,26 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 let filterComplex = `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
 
                 if (mockup !== 'none') {
-                    // Add mockup bar
+                    // Add mockup bar with proper sizing
+                    const mockupX = effectivePadding;
+                    const mockupBarWidth = outputWidth - effectivePadding * 2;
                     const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
                     const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
-                    const buttonY = mockup === 'chrome' ? 10 : 14;
-                    const videoYPos = mockupBarHeight + padding;
+                    const buttonSize = 20; // Larger buttons
+                    const buttonSpacing = 28; // Space between buttons
+                    const buttonStartX = mockupX + 24; // Start position from left
+                    const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
+                    const videoYPos = mockupBarHeight + effectivePadding;
+                    const borderRadius = 12;
 
-                    filterComplex += `[1:v]drawbox=x=0:y=0:w=${outputWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
-                    // Add traffic lights
-                    filterComplex += `[bg_with_bar]drawbox=x=16:y=${buttonY}:w=12:h=12:color=0xff5f56:t=fill,` +
-                        `drawbox=x=34:y=${buttonY}:w=12:h=12:color=0xffbd2e:t=fill,` +
-                        `drawbox=x=52:y=${buttonY}:w=12:h=12:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=(W-w)/2:${videoYPos}[outv]`;
+                    // Draw mockup bar with rounded corners at top
+                    filterComplex += `[1:v]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+
+                    // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
+                    filterComplex += `[bg_with_bar]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
+                        `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
+                        `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
+                        `[bg_final][scaled]overlay=${mockupX}:${videoYPos}[outv]`;
                 } else {
                     filterComplex += `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
                 }
