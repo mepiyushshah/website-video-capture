@@ -2394,12 +2394,14 @@ input[type="checkbox"] {
     color: #4a9eff;
 }
 
-/* Browser Mockup Frames */
+/* Browser Mockup Frames - Apple Pixel Perfect */
 .video-mockup-container {
     position: relative;
     display: block;
     width: 100%;
     height: 100%;
+    border-radius: 0;
+    overflow: visible;
 }
 
 .browser-mockup {
@@ -2413,11 +2415,17 @@ input[type="checkbox"] {
     background: transparent;
 }
 
-/* Chrome Mockup */
+/* Chrome Mockup - Pixel Perfect */
 .chrome-mockup {
-    border: 1px solid #3c4043;
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.1),
+        0 20px 60px rgba(0, 0, 0, 0.5);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .chrome-mockup::before {
@@ -2427,30 +2435,39 @@ input[type="checkbox"] {
     left: 0;
     right: 0;
     height: 40px;
-    background: linear-gradient(to bottom, #e8eaed 0%, #dadce0 100%);
-    border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid #c1c3c7;
+    background: #e8eaed;
+    border-bottom: 0.5px solid #c4c7cb;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .chrome-mockup::after {
     content: '';
     position: absolute;
-    top: 10px;
+    top: 14px;
     left: 16px;
     width: 12px;
     height: 12px;
     background: #ff5f56;
     border-radius: 50%;
     box-shadow:
-        18px 0 0 #ffbd2e,
-        36px 0 0 #27c93f;
+        20px 0 0 0 #ffbd2e,
+        40px 0 0 0 #27c93f;
+    z-index: 11;
+    pointer-events: none;
 }
 
-/* Safari Mockup */
+/* Safari Mockup - Pixel Perfect */
 .safari-mockup {
-    border: 1px solid #d1d1d6;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.45);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .safari-mockup::before {
@@ -2460,29 +2477,31 @@ input[type="checkbox"] {
     left: 0;
     right: 0;
     height: 44px;
-    background: linear-gradient(to bottom, #f6f6f6 0%, #ececec 100%);
-    border-radius: 12px 12px 0 0;
-    border-bottom: 1px solid #d1d1d6;
+    background: #f5f5f7;
+    border-bottom: 0.5px solid #d1d1d6;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .safari-mockup::after {
     content: '';
     position: absolute;
-    top: 14px;
+    top: 16px;
     left: 16px;
     width: 12px;
     height: 12px;
     background: #ff5f57;
     border-radius: 50%;
     box-shadow:
-        20px 0 0 #febc2e,
-        40px 0 0 #28c840;
+        22px 0 0 0 #febc2e,
+        44px 0 0 0 #28c840;
+    z-index: 11;
+    pointer-events: none;
 }
 
-/* Adjust video inside mockup container */
+/* Video positioning inside mockup - Pixel Perfect */
 .video-mockup-container #mainVideo {
     display: block;
-    border-radius: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -2490,20 +2509,33 @@ input[type="checkbox"] {
     top: 0;
     left: 0;
     z-index: 1;
+    border-radius: 0;
+}
+
+.video-mockup-container.chrome {
+    border-radius: 10px;
+    overflow: hidden;
+    isolation: isolate;
 }
 
 .video-mockup-container.chrome #mainVideo {
-    border-radius: 8px;
     top: 40px;
     height: calc(100% - 40px);
+    border-radius: 0;
     object-fit: cover;
     object-position: top center;
 }
 
-.video-mockup-container.safari #mainVideo {
+.video-mockup-container.safari {
     border-radius: 12px;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.video-mockup-container.safari #mainVideo {
     top: 44px;
     height: calc(100% - 44px);
+    border-radius: 0;
     object-fit: cover;
     object-position: top center;
 }
