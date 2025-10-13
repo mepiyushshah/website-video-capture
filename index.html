@@ -478,15 +478,37 @@
                 </div>
                 <div class="form-group">
                     <label>Capture Settings</label>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <span>Resolution: 1280x720</span>
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="quickResolution">Resolution</label>
+                            <select id="quickResolution" onchange="updateQuickSettings()">
+                                <option value="1280x720">1280x720 (HD)</option>
+                                <option value="1920x1080">1920x1080 (Full HD)</option>
+                                <option value="2560x1440">2560x1440 (2K)</option>
+                                <option value="3840x2160">3840x2160 (4K)</option>
+                            </select>
                         </div>
-                        <div class="setting-item">
-                            <span>Frame Rate: 30 FPS</span>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="quickFps">Frame Rate</label>
+                            <select id="quickFps" onchange="updateQuickSettings()">
+                                <option value="24">24 FPS (Cinematic)</option>
+                                <option value="30" selected>30 FPS (Standard)</option>
+                                <option value="60">60 FPS (Smooth)</option>
+                            </select>
                         </div>
-                        <div class="setting-item">
-                            <span>Scroll Duration: 10s</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="quickScrollDuration">Scroll Duration</label>
+                            <select id="quickScrollDuration" onchange="updateQuickSettings()">
+                                <option value="0" selected>Auto (adapts to page)</option>
+                                <option value="5">5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="15">15 seconds</option>
+                                <option value="20">20 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">60 seconds</option>
+                            </select>
                         </div>
                     </div>
                 </div>

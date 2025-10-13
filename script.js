@@ -411,7 +411,10 @@ function showDesign() {
 function startCapture() {
     const modal = document.getElementById('captureModal');
     modal.style.display = 'flex';
-    
+
+    // Load current settings into quick settings dropdowns
+    loadQuickSettings();
+
     // Trigger animation after display is set
     setTimeout(() => {
         modal.classList.add('show');
@@ -1753,3 +1756,72 @@ function getCurrentMockup() {
 
 // Export function
 window.getCurrentMockup = getCurrentMockup;
+
+// Quick Settings Functions (in Capture Modal)
+function loadQuickSettings() {
+    const settings = JSON.parse(localStorage.getItem('videoSettings') || '{}');
+
+    // Load resolution
+    const resolution = settings.resolution || '1280x720';
+    const resolutionSelect = document.getElementById('quickResolution');
+    if (resolutionSelect) {
+        resolutionSelect.value = resolution;
+    }
+
+    // Load FPS
+    const fps = settings.fps || '30';
+    const fpsSelect = document.getElementById('quickFps');
+    if (fpsSelect) {
+        fpsSelect.value = fps;
+    }
+
+    // Load scroll duration
+    const scrollDuration = settings.scrollDuration || 0;
+    const scrollDurationSelect = document.getElementById('quickScrollDuration');
+    if (scrollDurationSelect) {
+        scrollDurationSelect.value = scrollDuration.toString();
+    }
+}
+
+function updateQuickSettings() {
+    // Get current settings from localStorage
+    const settings = JSON.parse(localStorage.getItem('videoSettings') || '{}');
+
+    // Update with values from quick settings dropdowns
+    const resolutionSelect = document.getElementById('quickResolution');
+    const fpsSelect = document.getElementById('quickFps');
+    const scrollDurationSelect = document.getElementById('quickScrollDuration');
+
+    if (resolutionSelect) {
+        settings.resolution = resolutionSelect.value;
+    }
+    if (fpsSelect) {
+        settings.fps = fpsSelect.value;
+    }
+    if (scrollDurationSelect) {
+        settings.scrollDuration = parseInt(scrollDurationSelect.value);
+    }
+
+    // Save back to localStorage
+    localStorage.setItem('videoSettings', JSON.stringify(settings));
+
+    console.log('Quick settings updated:', settings);
+}
+
+function openCaptureSettings() {
+    // Save current quick settings before closing
+    updateQuickSettings();
+
+    // Close the capture modal
+    closeCaptureModal();
+
+    // Wait for modal to close, then open settings sidebar
+    setTimeout(() => {
+        showSettings();
+    }, 300);
+}
+
+// Export new functions
+window.loadQuickSettings = loadQuickSettings;
+window.updateQuickSettings = updateQuickSettings;
+window.openCaptureSettings = openCaptureSettings;
