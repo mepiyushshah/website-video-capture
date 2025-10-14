@@ -621,8 +621,6 @@ function showLoadingState(websiteUrl) {
                 border: 1px solid hsl(240 3.7% 15.9%);
                 border-radius: 12px;
                 padding: 24px;
-                box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-                backdrop-filter: blur(8px);
                 width: 500px;
                 max-width: 90vw;
             ">
@@ -687,7 +685,6 @@ function showLoadingState(websiteUrl) {
                             background: linear-gradient(90deg, hsl(142.1 76.2% 36.3%), hsl(142.1 70.6% 45.3%));
                             border-radius: 9999px;
                             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-                            box-shadow: 0 0 12px hsl(142.1 70.6% 45.3% / 0.5);
                         "></div>
                     </div>
                 </div>

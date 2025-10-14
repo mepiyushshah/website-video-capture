@@ -1710,6 +1710,15 @@ h3 sup {
     letter-spacing: -0.2px;
 }
 
+@keyframes subtle-pulse {
+    0%, 100% {
+        box-shadow: 0 8px 24px rgba(31, 90, 254, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(31, 90, 254, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+}
+
 .capture-btn i {
     color: white;
     font-size: 18px;
