@@ -362,7 +362,7 @@
                 if (response.ok) {
                     showSuccess('Login successful! Redirecting...');
                     setTimeout(() => {
-                        window.location.href = '/';
+                        window.location.href = '/dashboard';
                     }, 1000);
                 } else {
                     showError(data.error || 'Login failed');
@@ -428,7 +428,7 @@
             try {
                 const response = await fetch('/api/auth/me');
                 if (response.ok) {
-                    window.location.href = '/';
+                    window.location.href = '/dashboard';
                 }
             } catch (error) {
                 // User not logged in, stay on auth page

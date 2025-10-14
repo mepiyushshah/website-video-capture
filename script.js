@@ -1256,12 +1256,13 @@ async function logout() {
         });
 
         if (response.ok) {
-            showMessage('Logged out successfully', 'info');
-            // Redirect to auth page
-            window.location.href = '/auth.html';
+            // Redirect to home page (landing page) immediately
+            window.location.href = '/';
         }
     } catch (error) {
-        showMessage('Logout failed', 'error');
+        console.error('Logout error:', error);
+        // Still redirect even on error
+        window.location.href = '/';
     }
 }
 

@@ -99,8 +99,18 @@ app.post('/api/auth/logout', (req, res) => {
             auth.logout(sessionToken);
         }
 
-        res.clearCookie('sessionToken');
-        req.session.destroy();
+        // Clear all cookies
+        res.clearCookie('sessionToken', { path: '/' });
+        res.clearCookie('connect.sid', { path: '/' });
+
+        // Destroy session
+        if (req.session) {
+            req.session.destroy((err) => {
+                if (err) {
+                    console.error('Session destroy error:', err);
+                }
+            });
+        }
 
         res.json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
@@ -483,8 +493,20 @@ function parseGradientColors(gradientString) {
     return ['0x1a1a1a', '0x2a2a2a'];
 }
 
-// Serve the main page (protected)
+// Serve the landing page (public)
 app.get('/', (req, res) => {
+    const sessionToken = req.cookies.sessionToken || req.session.token;
+
+    // If already authenticated, redirect to dashboard
+    if (sessionToken && auth.verifySession(sessionToken)) {
+        return res.redirect('/dashboard');
+    }
+
+    res.sendFile(path.join(__dirname, 'home.html'));
+});
+
+// Serve the dashboard (protected)
+app.get('/dashboard', (req, res) => {
     const sessionToken = req.cookies.sessionToken || req.session.token;
 
     // Check if user is authenticated
@@ -497,6 +519,13 @@ app.get('/', (req, res) => {
 
 // Serve auth page
 app.get('/auth.html', (req, res) => {
+    const sessionToken = req.cookies.sessionToken || req.session.token;
+
+    // If already authenticated, redirect to dashboard
+    if (sessionToken && auth.verifySession(sessionToken)) {
+        return res.redirect('/dashboard');
+    }
+
     res.sendFile(path.join(__dirname, 'auth.html'));
 });
 
