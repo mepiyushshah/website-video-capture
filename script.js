@@ -449,6 +449,9 @@ async function startCaptureProcess() {
         }
     }
 
+    // Reset abort flag
+    captureAborted = false;
+
     // Close modal
     closeCaptureModal();
 
@@ -456,7 +459,6 @@ async function startCaptureProcess() {
     showLoadingState(url);
 
     // Start realistic progress tracking
-    let progressInterval;
     let captureStartTime = Date.now();
 
     try {
@@ -473,7 +475,16 @@ async function startCaptureProcess() {
         });
 
         // Update progress based on realistic timing
-        progressInterval = setInterval(() => {
+        currentProgressInterval = setInterval(() => {
+            // Check if capture was aborted
+            if (captureAborted) {
+                if (currentProgressInterval) {
+                    clearInterval(currentProgressInterval);
+                    currentProgressInterval = null;
+                }
+                return;
+            }
+
             const elapsed = Date.now() - captureStartTime;
             let progress = 0;
             let stepTitle = '';
@@ -510,11 +521,18 @@ async function startCaptureProcess() {
         }, 500);
 
         const response = await capturePromise;
+
+        // Check if aborted before processing response
+        if (captureAborted) {
+            return;
+        }
+
         const result = await response.json();
 
         // Clear progress interval
-        if (progressInterval) {
-            clearInterval(progressInterval);
+        if (currentProgressInterval) {
+            clearInterval(currentProgressInterval);
+            currentProgressInterval = null;
         }
 
         if (result.success) {
@@ -550,12 +568,17 @@ async function startCaptureProcess() {
             showErrorMessage(`Capture failed: ${result.error}`);
         }
     } catch (error) {
-        if (progressInterval) {
-            clearInterval(progressInterval);
+        if (currentProgressInterval) {
+            clearInterval(currentProgressInterval);
+            currentProgressInterval = null;
         }
-        hideLoadingState();
-        console.error('Capture error:', error);
-        showErrorMessage(`Failed to capture video. Please check server connection.`);
+
+        // Don't show error if capture was aborted
+        if (!captureAborted) {
+            hideLoadingState();
+            console.error('Capture error:', error);
+            showErrorMessage(`Failed to capture video. Please check server connection.`);
+        }
     }
 }
 
@@ -566,24 +589,150 @@ function showLoadingState(websiteUrl) {
         sidebar.style.display = 'none';
     }
 
-    // Transform the Start Capture button to show recording status with progress
+    // Hide only the placeholder content (icon, text) but keep the container visible
+    const placeholderContent = document.querySelector('.placeholder-content');
+    if (placeholderContent) {
+        // Hide the icon, h3, and p elements
+        const icon = placeholderContent.querySelector('i');
+        const h3 = placeholderContent.querySelector('h3');
+        const p = placeholderContent.querySelector('p');
+        if (icon) icon.style.display = 'none';
+        if (h3) h3.style.display = 'none';
+        if (p) p.style.display = 'none';
+    }
+
+    // Transform the Start Capture button to show shadcn-inspired recording status card
     const captureBtn = document.querySelector('.capture-btn');
     if (captureBtn) {
         captureBtn.disabled = true;
         captureBtn.style.position = 'relative';
-        captureBtn.style.overflow = 'hidden';
-        captureBtn.style.background = '#dc2626';
+        captureBtn.style.overflow = 'visible';
+        captureBtn.style.background = 'transparent';
+        captureBtn.style.border = 'none';
         captureBtn.style.cursor = 'not-allowed';
-        captureBtn.style.minWidth = '280px';
-        captureBtn.style.height = '60px';
+        captureBtn.style.minWidth = '100%';
+        captureBtn.style.height = 'auto';
+        captureBtn.style.padding = '0';
+        captureBtn.style.boxShadow = 'none';
+        captureBtn.style.transform = 'none';
         captureBtn.innerHTML = `
-            <div style="position: absolute; left: 0; top: 0; height: 100%; background: rgba(0,0,0,0.3); width: 0%; transition: width 0.5s ease;" id="captureBtnProgress"></div>
-            <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div class="recording-pulse" style="width: 8px; height: 8px;"></div>
-                    <span style="font-weight: 600; font-size: 15px;">Sit back & relax</span>
+            <div style="
+                background: hsl(240 10% 3.9%);
+                border: 1px solid hsl(240 3.7% 15.9%);
+                border-radius: 12px;
+                padding: 24px;
+                box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+                backdrop-filter: blur(8px);
+                width: 500px;
+                max-width: 90vw;
+            ">
+                <!-- Header -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="
+                        width: 40px;
+                        height: 40px;
+                        background: hsl(142.1 76.2% 36.3% / 0.15);
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">
+                        <svg style="width: 20px; height: 20px; color: hsl(142.1 70.6% 45.3%);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="
+                            font-size: 18px;
+                            font-weight: 600;
+                            color: hsl(0 0% 98%);
+                            margin-bottom: 2px;
+                            letter-spacing: -0.02em;
+                        ">Recording in Progress</div>
+                        <div style="
+                            font-size: 14px;
+                            color: hsl(240 5% 64.9%);
+                        " id="captureStepText">Initializing capture...</div>
+                    </div>
                 </div>
-                <span style="font-size: 12px; opacity: 0.9;" id="captureProgress">0% complete</span>
+
+                <!-- Progress Section -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="
+                            font-size: 13px;
+                            font-weight: 500;
+                            color: hsl(0 0% 98%);
+                        " id="captureStepTitle">Step 1 of 4: Initializing Browser</span>
+                        <span style="
+                            font-size: 13px;
+                            font-weight: 600;
+                            color: hsl(142.1 70.6% 45.3%);
+                            tabular-nums: 1;
+                        " id="captureProgress">0%</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div style="
+                        width: 100%;
+                        height: 8px;
+                        background: hsl(240 3.7% 15.9%);
+                        border-radius: 9999px;
+                        overflow: hidden;
+                        position: relative;
+                    ">
+                        <div id="captureBtnProgress" style="
+                            height: 100%;
+                            width: 0%;
+                            background: linear-gradient(90deg, hsl(142.1 76.2% 36.3%), hsl(142.1 70.6% 45.3%));
+                            border-radius: 9999px;
+                            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                            box-shadow: 0 0 12px hsl(142.1 70.6% 45.3% / 0.5);
+                        "></div>
+                    </div>
+                </div>
+
+                <!-- Time Estimate & Cancel Button -->
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    justify-content: space-between;
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 12px 16px;
+                        background: hsl(240 3.7% 15.9% / 0.5);
+                        border-radius: 8px;
+                        border: 1px solid hsl(240 3.7% 15.9%);
+                        flex: 1;
+                    ">
+                        <svg style="width: 16px; height: 16px; color: hsl(240 5% 64.9%);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span style="
+                            font-size: 13px;
+                            color: hsl(240 5% 64.9%);
+                        " id="captureTimeEstimate">Estimated time remaining: ~30s</span>
+                    </div>
+
+                    <button onclick="cancelCapture()" style="
+                        padding: 12px 20px;
+                        background: transparent;
+                        border: 1px solid hsl(0 84.2% 60.2%);
+                        color: hsl(0 84.2% 60.2%);
+                        border-radius: 8px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        white-space: nowrap;
+                    " onmouseover="this.style.background='hsl(0 84.2% 60.2% / 0.1)'" onmouseout="this.style.background='transparent'">
+                        Cancel
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -655,12 +804,28 @@ function hideLoadingState() {
         sidebar.style.display = 'flex';
     }
 
+    // Show the placeholder content again (icon, text)
+    const placeholderContent = document.querySelector('.placeholder-content');
+    if (placeholderContent) {
+        const icon = placeholderContent.querySelector('i');
+        const h3 = placeholderContent.querySelector('h3');
+        const p = placeholderContent.querySelector('p');
+        if (icon) icon.style.display = '';
+        if (h3) h3.style.display = '';
+        if (p) p.style.display = '';
+    }
+
     // Reset the Start Capture button to its original state
     const captureBtn = document.querySelector('.capture-btn');
     if (captureBtn) {
         captureBtn.disabled = false;
         captureBtn.style.background = '';
+        captureBtn.style.border = '';
+        captureBtn.style.padding = '';
+        captureBtn.style.minWidth = '';
+        captureBtn.style.height = '';
         captureBtn.style.cursor = '';
+        captureBtn.style.overflow = '';
         captureBtn.innerHTML = '<span>Start Capture</span>';
     }
 
@@ -678,6 +843,25 @@ function hideLoadingState() {
     `;
 }
 
+// Global variable to track capture cancellation
+let captureAborted = false;
+let currentProgressInterval = null;
+
+function cancelCapture() {
+    if (confirm('Are you sure you want to cancel the recording?')) {
+        captureAborted = true;
+
+        // Clear any active progress intervals
+        if (currentProgressInterval) {
+            clearInterval(currentProgressInterval);
+            currentProgressInterval = null;
+        }
+
+        hideLoadingState();
+        showErrorMessage('Video capture cancelled by user');
+    }
+}
+
 // Real progress tracking functions
 function updateProgress(percentage, stepTitle, stepDetail, stepNumber = 1) {
     // Update overall progress bar
@@ -688,12 +872,38 @@ function updateProgress(percentage, stepTitle, stepDetail, stepNumber = 1) {
         progressText.textContent = `${Math.round(percentage)}%`;
     }
 
-    // Update the capture button progress
+    // Update the capture button progress (new shadcn-inspired design)
     const captureBtnProgress = document.getElementById('captureBtnProgress');
     const captureProgressText = document.getElementById('captureProgress');
+    const captureStepText = document.getElementById('captureStepText');
+    const captureStepTitle = document.getElementById('captureStepTitle');
+    const captureTimeEstimate = document.getElementById('captureTimeEstimate');
+
     if (captureBtnProgress && captureProgressText) {
         captureBtnProgress.style.width = `${percentage}%`;
-        captureProgressText.textContent = `${Math.round(percentage)}% complete`;
+        captureProgressText.textContent = `${Math.round(percentage)}%`;
+    }
+
+    if (captureStepText) {
+        captureStepText.textContent = stepDetail;
+    }
+
+    if (captureStepTitle) {
+        captureStepTitle.textContent = `Step ${stepNumber} of 4: ${stepTitle}`;
+    }
+
+    // Calculate and update time estimate
+    if (captureTimeEstimate) {
+        const remainingPercentage = 100 - percentage;
+        const estimatedSeconds = Math.ceil((remainingPercentage / 100) * 30); // Assume ~30s total
+
+        if (percentage >= 95) {
+            captureTimeEstimate.textContent = 'Almost done...';
+        } else if (estimatedSeconds <= 5) {
+            captureTimeEstimate.textContent = 'Just a few seconds...';
+        } else {
+            captureTimeEstimate.textContent = `Estimated time remaining: ~${estimatedSeconds}s`;
+        }
     }
 
     // Update current step
@@ -1162,6 +1372,7 @@ function handleSearch() {
 window.startCapture = startCapture;
 window.closeCaptureModal = closeCaptureModal;
 window.startCaptureProcess = startCaptureProcess;
+window.cancelCapture = cancelCapture;
 window.showSettings = showSettings;
 window.closeSettingsModal = closeSettingsModal;
 window.switchTab = switchTab;
