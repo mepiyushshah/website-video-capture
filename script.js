@@ -739,6 +739,11 @@ function showLoadingState(websiteUrl) {
 
     // Update status panel with detailed progress tracking
     const statusPanel = document.getElementById('statusPanel');
+    if (!statusPanel) {
+        console.log('Status panel not found, skipping status update');
+        return;
+    }
+
     const domain = websiteUrl ? new URL(websiteUrl).hostname : 'website';
 
     statusPanel.innerHTML = `
@@ -830,17 +835,19 @@ function hideLoadingState() {
     }
 
     const statusPanel = document.getElementById('statusPanel');
-    statusPanel.innerHTML = `
-        <div class="status-item ready-state">
-            <div class="ready-icon">
-                <i class="fas fa-check-circle" style="color: #00aa00;"></i>
+    if (statusPanel) {
+        statusPanel.innerHTML = `
+            <div class="status-item ready-state">
+                <div class="ready-icon">
+                    <i class="fas fa-check-circle" style="color: #00aa00;"></i>
+                </div>
+                <div class="ready-content">
+                    <span class="ready-title">Ready to Capture</span>
+                    <span class="ready-detail">Click 'Start Capture' to begin recording</span>
+                </div>
             </div>
-            <div class="ready-content">
-                <span class="ready-title">Ready to Capture</span>
-                <span class="ready-detail">Click 'Start Capture' to begin recording</span>
-            </div>
-        </div>
-    `;
+        `;
+    }
 }
 
 // Global variable to track capture cancellation
@@ -1369,6 +1376,16 @@ function handleSearch() {
 }
 
 // Export functions for global access
+function closeSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+}
+
 window.startCapture = startCapture;
 window.closeCaptureModal = closeCaptureModal;
 window.startCaptureProcess = startCaptureProcess;

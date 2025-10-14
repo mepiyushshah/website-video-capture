@@ -139,61 +139,79 @@ app.get('/api/auth/me', (req, res) => {
 
 // API endpoint to start video capture
 app.post('/api/capture', async (req, res) => {
+    console.log('📥 Received capture request');
+    console.log('Request body:', req.body);
+
     const { url, filename, settings } = req.body;
-    
+
     if (!url) {
+        console.log('❌ No URL provided');
         return res.status(400).json({ error: 'URL is required' });
     }
-    
+
     try {
         console.log(`🎬 Starting capture of: ${url}`);
-        
+        console.log(`📝 Filename: ${filename}`);
+        console.log(`⚙️ Settings:`, settings);
+
         // Create a temporary settings file
         const settingsFile = path.join(__dirname, 'temp-settings.json');
         fs.writeFileSync(settingsFile, JSON.stringify(settings || {}));
-        
+        console.log(`✅ Settings file created: ${settingsFile}`);
+
         // Run the capture script with settings
+        console.log(`🚀 Spawning capture process...`);
         const captureProcess = spawn('node', ['capture.js', url, filename, settingsFile], {
             stdio: 'pipe'
         });
-        
+
         let output = '';
         let errorOutput = '';
-        
+
         captureProcess.stdout.on('data', (data) => {
             output += data.toString();
-            console.log(data.toString());
+            console.log('📤 Capture stdout:', data.toString());
         });
-        
+
         captureProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
-            console.error(data.toString());
+            console.error('📤 Capture stderr:', data.toString());
         });
-        
+
         captureProcess.on('close', (code) => {
+            console.log(`✅ Capture process exited with code: ${code}`);
+
             // Clean up temporary settings file
             if (fs.existsSync(settingsFile)) {
                 fs.unlinkSync(settingsFile);
+                console.log(`🗑️ Cleaned up settings file`);
             }
-            
+
             if (code === 0) {
-                res.json({ 
-                    success: true, 
+                console.log(`✅ Capture successful: ${filename}`);
+                res.json({
+                    success: true,
                     message: 'Video captured successfully',
                     filename: filename,
                     output: output
                 });
             } else {
-                res.status(500).json({ 
-                    error: 'Capture failed', 
-                    details: errorOutput 
+                console.log(`❌ Capture failed with code ${code}`);
+                res.status(500).json({
+                    error: 'Capture failed',
+                    details: errorOutput
                 });
             }
         });
-        
+
+        captureProcess.on('error', (err) => {
+            console.error('❌ Capture process error:', err);
+            res.status(500).json({ error: 'Failed to start capture process: ' + err.message });
+        });
+
     } catch (error) {
-        console.error('Capture error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('❌ Capture error:', error);
+        res.status(500).json({ error: 'Internal server error: ' + error.message });
     }
 });
 
