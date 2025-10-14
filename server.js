@@ -23,8 +23,11 @@ app.use(session({
     }
 }));
 
-// Serve static files
-app.use(express.static('.'));
+// Serve static files (but not HTML files at root)
+app.use(express.static('.', {
+    index: false,  // Don't serve index.html automatically
+    extensions: ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf']
+}));
 app.use('/captures', express.static('captures'));
 
 // Authentication middleware
@@ -495,13 +498,7 @@ function parseGradientColors(gradientString) {
 
 // Serve the landing page (public)
 app.get('/', (req, res) => {
-    const sessionToken = req.cookies.sessionToken || req.session.token;
-
-    // If already authenticated, redirect to dashboard
-    if (sessionToken && auth.verifySession(sessionToken)) {
-        return res.redirect('/dashboard');
-    }
-
+    // Always show homepage for testing
     res.sendFile(path.join(__dirname, 'home.html'));
 });
 
