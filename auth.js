@@ -1,37 +1,48 @@
+require('dotenv').config();
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
+const { isSupabaseConfigured } = require('./supabase-client');
+const authSupabase = require('./auth-supabase');
 
-// Initialize database
-const dbPath = path.join(__dirname, 'users.db');
-const db = new Database(dbPath);
+// Check if Supabase is configured
+const useSupabase = isSupabaseConfigured();
 
-// Create users table if it doesn't exist
-db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        credits INTEGER DEFAULT 100
-    )
-`);
+console.log(`🔐 Using ${useSupabase ? 'Supabase' : 'SQLite'} for authentication`);
 
-// Create sessions table
-db.exec(`
-    CREATE TABLE IF NOT EXISTS sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        session_token TEXT UNIQUE NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        expires_at DATETIME NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-`);
+// Initialize SQLite database (fallback)
+let db = null;
+if (!useSupabase) {
+    const dbPath = path.join(__dirname, 'users.db');
+    db = new Database(dbPath);
 
-// User authentication functions
-const auth = {
+    // Create users table if it doesn't exist
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            credits INTEGER DEFAULT 100
+        )
+    `);
+
+    // Create sessions table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            session_token TEXT UNIQUE NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            expires_at DATETIME NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    `);
+}
+
+// SQLite authentication functions
+const authSQLite = {
     // Register a new user
     register: async (email, password) => {
         try {
@@ -178,9 +189,50 @@ function generateSessionToken() {
     return require('crypto').randomBytes(32).toString('hex');
 }
 
-// Clean up expired sessions periodically (every hour)
-setInterval(() => {
-    auth.cleanupSessions();
-}, 60 * 60 * 1000);
+// Export unified auth interface that delegates to the appropriate implementation
+const auth = {
+    register: (email, password) => {
+        return useSupabase
+            ? authSupabase.register(email, password)
+            : authSQLite.register(email, password);
+    },
+    login: (email, password) => {
+        return useSupabase
+            ? authSupabase.login(email, password)
+            : authSQLite.login(email, password);
+    },
+    verifySession: (sessionToken) => {
+        return useSupabase
+            ? authSupabase.verifySession(sessionToken)
+            : authSQLite.verifySession(sessionToken);
+    },
+    logout: (sessionToken) => {
+        return useSupabase
+            ? authSupabase.logout(sessionToken)
+            : authSQLite.logout(sessionToken);
+    },
+    getUserById: (userId) => {
+        return useSupabase
+            ? authSupabase.getUserById(userId)
+            : authSQLite.getUserById(userId);
+    },
+    updateCredits: (userId, credits) => {
+        return useSupabase
+            ? authSupabase.updateCredits(userId, credits)
+            : authSQLite.updateCredits(userId, credits);
+    },
+    cleanupSessions: () => {
+        return useSupabase
+            ? authSupabase.cleanupSessions()
+            : authSQLite.cleanupSessions();
+    }
+};
+
+// Clean up expired sessions periodically (every hour) - only for SQLite
+if (!useSupabase) {
+    setInterval(() => {
+        auth.cleanupSessions();
+    }, 60 * 60 * 1000);
+}
 
 module.exports = auth;
