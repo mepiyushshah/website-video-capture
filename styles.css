@@ -818,6 +818,21 @@ h3 sup {
     border-radius: 6px;
 }
 
+.color-input-group input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Monaco', monospace;
+    outline: none;
+    padding: 4px 8px;
+}
+
+.color-input-group input[type="text"]::placeholder {
+    color: #666;
+}
+
 .color-code {
     color: #888;
     font-size: 12px;

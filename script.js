@@ -204,16 +204,6 @@ function loadVideo(fileName) {
             videoHeaderControls.style.display = 'flex';
         }
 
-        // Show Preview and Design tabs when video is loaded
-        const previewTab = document.getElementById('previewTab');
-        const designTab = document.getElementById('designTab');
-        if (previewTab) {
-            previewTab.style.display = 'flex';
-        }
-        if (designTab) {
-            designTab.style.display = 'flex';
-        }
-
         // Update file selection in explorer
         updateFileSelection(fileName);
 
@@ -1549,10 +1539,31 @@ function initializeVideoEditor() {
         });
     }
 
-    // Solid color input
+    // Solid color input - text field
     const bgColorInput = document.getElementById('bgColorInput');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+
     if (bgColorInput) {
         bgColorInput.addEventListener('input', (e) => {
+            const colorValue = e.target.value.trim();
+            // If it's a valid hex color, update the color picker
+            if (colorValue.match(/^#[0-9A-Fa-f]{6}$/)) {
+                if (bgColorPicker) {
+                    bgColorPicker.value = colorValue;
+                }
+            }
+            applySolidBackground();
+        });
+    }
+
+    // Solid color input - color picker
+    if (bgColorPicker) {
+        bgColorPicker.addEventListener('input', (e) => {
+            const colorValue = e.target.value;
+            // Update the text input with the color picker value
+            if (bgColorInput) {
+                bgColorInput.value = colorValue;
+            }
             applySolidBackground();
         });
     }
