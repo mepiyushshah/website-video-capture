@@ -1599,6 +1599,15 @@ function initializeVideoEditor() {
         });
     });
 
+    // Initialize animated gradient backgrounds
+    const animatedGradients = document.querySelectorAll('.gradient-preset.animated-gradient');
+    animatedGradients.forEach(preset => {
+        const color1 = preset.getAttribute('data-color1');
+        const color2 = preset.getAttribute('data-color2');
+        if (color1 && color2) {
+            preset.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+        }
+    });
 
     // Padding slider
     const paddingSlider = document.getElementById('paddingSlider');
@@ -1646,9 +1655,9 @@ function resetPadding() {
     const videoWrapper = document.getElementById('videoWrapper');
 
     if (paddingSlider && paddingValue && videoWrapper) {
-        paddingSlider.value = 40;
-        paddingValue.textContent = '40';
-        videoWrapper.style.padding = '40px';
+        paddingSlider.value = 0;
+        paddingValue.textContent = '0';
+        videoWrapper.style.padding = '0px';
     }
 }
 
@@ -1703,7 +1712,7 @@ async function renderVideo() {
 
     // Get padding value
     const paddingSlider = document.getElementById('paddingSlider');
-    const padding = paddingSlider ? parseInt(paddingSlider.value) : 40;
+    const padding = paddingSlider ? parseInt(paddingSlider.value) : 0;
 
     // Get current mockup
     const mockup = getCurrentMockup();

@@ -89,20 +89,141 @@
                                 </div>
                             </div>
 
-                            <label class="section-label">Gradient Presets</label>
-                            <div class="gradient-presets">
-                                <button class="gradient-preset" data-color1="#667eea" data-color2="#764ba2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></button>
-                                <button class="gradient-preset" data-color1="#f093fb" data-color2="#f5576c" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></button>
-                                <button class="gradient-preset" data-color1="#4facfe" data-color2="#00f2fe" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></button>
-                                <button class="gradient-preset" data-color1="#43e97b" data-color2="#38f9d7" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></button>
-                                <button class="gradient-preset" data-color1="#fa709a" data-color2="#fee140" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></button>
-                                <button class="gradient-preset" data-color1="#30cfd0" data-color2="#330867" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></button>
-                                <button class="gradient-preset" data-color1="#a8edea" data-color2="#fed6e3" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></button>
-                                <button class="gradient-preset" data-color1="#ff9a56" data-color2="#ff6a88" style="background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);"></button>
-                                <button class="gradient-preset" data-color1="#ffecd2" data-color2="#fcb69f" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);"></button>
-                                <button class="gradient-preset" data-color1="#ff6e7f" data-color2="#bfe9ff" style="background: linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%);"></button>
-                                <button class="gradient-preset" data-color1="#e0c3fc" data-color2="#8ec5fc" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);"></button>
-                                <button class="gradient-preset" data-color1="#f77062" data-color2="#fe5196" style="background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);"></button>
+                            <label class="section-label">Gradient Presets <span style="color: #666; font-size: 12px;">(110 presets, 10 animated)</span></label>
+                            <div class="gradient-presets" id="gradientPresetsContainer">
+                                <!-- Animated Gradients (First 10) -->
+                                <button class="gradient-preset animated-gradient" data-color1="#667eea" data-color2="#764ba2" title="Animated: Purple Dream"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#f093fb" data-color2="#f5576c" title="Animated: Pink Sunset"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#4facfe" data-color2="#00f2fe" title="Animated: Ocean Blue"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#43e97b" data-color2="#38f9d7" title="Animated: Mint Fresh"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#fa709a" data-color2="#fee140" title="Animated: Sunset Glow"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#ff6e7f" data-color2="#bfe9ff" title="Animated: Cotton Candy"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#a8edea" data-color2="#fed6e3" title="Animated: Pastel Dream"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#ff9a56" data-color2="#ff6a88" title="Animated: Coral Reef"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#30cfd0" data-color2="#330867" title="Animated: Deep Ocean"></button>
+                                <button class="gradient-preset animated-gradient" data-color1="#e0c3fc" data-color2="#8ec5fc" title="Animated: Lavender Sky"></button>
+
+                                <!-- Static Gradients -->
+                                <!-- Purples & Violets -->
+                                <button class="gradient-preset" data-color1="#7F00FF" data-color2="#E100FF" style="background: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%);" title="Electric Violet"></button>
+                                <button class="gradient-preset" data-color1="#360033" data-color2="#0b8793" style="background: linear-gradient(135deg, #360033 0%, #0b8793 100%);" title="Deep Purple Sea"></button>
+                                <button class="gradient-preset" data-color1="#9D50BB" data-color2="#6E48AA" style="background: linear-gradient(135deg, #9D50BB 0%, #6E48AA 100%);" title="Plum Plate"></button>
+                                <button class="gradient-preset" data-color1="#a044ff" data-color2="#6a3093" style="background: linear-gradient(135deg, #a044ff 0%, #6a3093 100%);" title="Purple Paradise"></button>
+                                <button class="gradient-preset" data-color1="#5f2c82" data-color2="#49a09d" style="background: linear-gradient(135deg, #5f2c82 0%, #49a09d 100%);" title="Sublime Vivid"></button>
+                                <button class="gradient-preset" data-color1="#654ea3" data-color2="#eaafc8" style="background: linear-gradient(135deg, #654ea3 0%, #eaafc8 100%);" title="Purple Love"></button>
+                                <button class="gradient-preset" data-color1="#8e2de2" data-color2="#4a00e0" style="background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);" title="Purple Bliss"></button>
+                                <button class="gradient-preset" data-color1="#642B73" data-color2="#C6426E" style="background: linear-gradient(135deg, #642B73 0%, #C6426E 100%);" title="Kashmir"></button>
+
+                                <!-- Blues & Cyans -->
+                                <button class="gradient-preset" data-color1="#1e3c72" data-color2="#2a5298" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);" title="Dark Blue"></button>
+                                <button class="gradient-preset" data-color1="#314755" data-color2="#26a0da" style="background: linear-gradient(135deg, #314755 0%, #26a0da 100%);" title="Blue Lagoon"></button>
+                                <button class="gradient-preset" data-color1="#2c3e50" data-color2="#3498db" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);" title="Midnight City"></button>
+                                <button class="gradient-preset" data-color1="#1488CC" data-color2="#2B32B2" style="background: linear-gradient(135deg, #1488CC 0%, #2B32B2 100%);" title="Celestial"></button>
+                                <button class="gradient-preset" data-color1="#06beb6" data-color2="#48b1bf" style="background: linear-gradient(135deg, #06beb6 0%, #48b1bf 100%);" title="Virgin America"></button>
+                                <button class="gradient-preset" data-color1="#00c6ff" data-color2="#0072ff" style="background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);" title="Turquoise Flow"></button>
+                                <button class="gradient-preset" data-color1="#136a8a" data-color2="#267871" style="background: linear-gradient(135deg, #136a8a 0%, #267871 100%);" title="Man of Steel"></button>
+                                <button class="gradient-preset" data-color1="#2980b9" data-color2="#6dd5fa" style="background: linear-gradient(135deg, #2980b9 0%, #6dd5fa 100%);" title="Clear Sky"></button>
+                                <button class="gradient-preset" data-color1="#373B44" data-color2="#4286f4" style="background: linear-gradient(135deg, #373B44 0%, #4286f4 100%);" title="Blue Skies"></button>
+                                <button class="gradient-preset" data-color1="#56CCF2" data-color2="#2F80ED" style="background: linear-gradient(135deg, #56CCF2 0%, #2F80ED 100%);" title="Electric Blue"></button>
+
+                                <!-- Greens & Teals -->
+                                <button class="gradient-preset" data-color1="#134E5E" data-color2="#71B280" style="background: linear-gradient(135deg, #134E5E 0%, #71B280 100%);" title="Green Beach"></button>
+                                <button class="gradient-preset" data-color1="#02AAB0" data-color2="#00CDAC" style="background: linear-gradient(135deg, #02AAB0 0%, #00CDAC 100%);" title="Turquoise Topaz"></button>
+                                <button class="gradient-preset" data-color1="#1D976C" data-color2="#93F9B9" style="background: linear-gradient(135deg, #1D976C 0%, #93F9B9 100%);" title="Green to Cyan"></button>
+                                <button class="gradient-preset" data-color1="#0F2027" data-color2="#2C5364" style="background: linear-gradient(135deg, #0F2027 0%, #2C5364 100%);" title="Dark Forest"></button>
+                                <button class="gradient-preset" data-color1="#56ab2f" data-color2="#a8e063" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);" title="Army Green"></button>
+                                <button class="gradient-preset" data-color1="#11998e" data-color2="#38ef7d" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);" title="Sea Green"></button>
+                                <button class="gradient-preset" data-color1="#00b09b" data-color2="#96c93d" style="background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);" title="Lush"></button>
+                                <button class="gradient-preset" data-color1="#76b852" data-color2="#8DC26F" style="background: linear-gradient(135deg, #76b852 0%, #8DC26F 100%);" title="Greenify"></button>
+                                <button class="gradient-preset" data-color1="#1e9600" data-color2="#fff200" style="background: linear-gradient(135deg, #1e9600 0%, #fff200 100%);" title="Electric Lime"></button>
+                                <button class="gradient-preset" data-color1="#3CA55C" data-color2="#B5AC49" style="background: linear-gradient(135deg, #3CA55C 0%, #B5AC49 100%);" title="Green Gold"></button>
+
+                                <!-- Yellows & Golds -->
+                                <button class="gradient-preset" data-color1="#F7971E" data-color2="#FFD200" style="background: linear-gradient(135deg, #F7971E 0%, #FFD200 100%);" title="Mango Pulp"></button>
+                                <button class="gradient-preset" data-color1="#F2994A" data-color2="#F2C94C" style="background: linear-gradient(135deg, #F2994A 0%, #F2C94C 100%);" title="Warm Flame"></button>
+                                <button class="gradient-preset" data-color1="#FFE000" data-color2="#799F0C" style="background: linear-gradient(135deg, #FFE000 0%, #799F0C 100%);" title="Yellow Green"></button>
+                                <button class="gradient-preset" data-color1="#FFE259" data-color2="#FFA751" style="background: linear-gradient(135deg, #FFE259 0%, #FFA751 100%);" title="Sunrise"></button>
+                                <button class="gradient-preset" data-color1="#FDBB2D" data-color2="#22C1C3" style="background: linear-gradient(135deg, #FDBB2D 0%, #22C1C3 100%);" title="Summer Breeze"></button>
+                                <button class="gradient-preset" data-color1="#f8b500" data-color2="#fceabb" style="background: linear-gradient(135deg, #f8b500 0%, #fceabb 100%);" title="Honey"></button>
+                                <button class="gradient-preset" data-color1="#f7ce68" data-color2="#fbab7e" style="background: linear-gradient(135deg, #f7ce68 0%, #fbab7e 100%);" title="Peach Fuzz"></button>
+                                <button class="gradient-preset" data-color1="#fc4a1a" data-color2="#f7b733" style="background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);" title="Flare"></button>
+
+                                <!-- Oranges & Corals -->
+                                <button class="gradient-preset" data-color1="#f46b45" data-color2="#eea849" style="background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);" title="Sunset Orange"></button>
+                                <button class="gradient-preset" data-color1="#ff7e5f" data-color2="#feb47b" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" title="Peach"></button>
+                                <button class="gradient-preset" data-color1="#ed4264" data-color2="#ffedbc" style="background: linear-gradient(135deg, #ed4264 0%, #ffedbc 100%);" title="Orange Coral"></button>
+                                <button class="gradient-preset" data-color1="#FF416C" data-color2="#FF4B2B" style="background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);" title="Burning Orange"></button>
+                                <button class="gradient-preset" data-color1="#FF512F" data-color2="#DD2476" style="background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%);" title="Fire"></button>
+                                <button class="gradient-preset" data-color1="#fc6767" data-color2="#ec008c" style="background: linear-gradient(135deg, #fc6767 0%, #ec008c 100%);" title="Bloody Mary"></button>
+                                <button class="gradient-preset" data-color1="#e96443" data-color2="#904e95" style="background: linear-gradient(135deg, #e96443 0%, #904e95 100%);" title="Purple Red"></button>
+                                <button class="gradient-preset" data-color1="#ff9966" data-color2="#ff5e62" style="background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);" title="Tangerine"></button>
+
+                                <!-- Reds & Pinks -->
+                                <button class="gradient-preset" data-color1="#e43a15" data-color2="#e65245" style="background: linear-gradient(135deg, #e43a15 0%, #e65245 100%);" title="Bloody Red"></button>
+                                <button class="gradient-preset" data-color1="#cb2d3e" data-color2="#ef473a" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);" title="Rose Red"></button>
+                                <button class="gradient-preset" data-color1="#C33764" data-color2="#1D2671" style="background: linear-gradient(135deg, #C33764 0%, #1D2671 100%);" title="Pinot Noir"></button>
+                                <button class="gradient-preset" data-color1="#DA4453" data-color2="#89216B" style="background: linear-gradient(135deg, #DA4453 0%, #89216B 100%);" title="Cherry"></button>
+                                <button class="gradient-preset" data-color1="#eb3349" data-color2="#f45c43" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);" title="Crimson"></button>
+                                <button class="gradient-preset" data-color1="#B24592" data-color2="#F15F79" style="background: linear-gradient(135deg, #B24592 0%, #F15F79 100%);" title="Very Pink"></button>
+                                <button class="gradient-preset" data-color1="#ff0084" data-color2="#33001b" style="background: linear-gradient(135deg, #ff0084 0%, #33001b 100%);" title="Hot Pink"></button>
+                                <button class="gradient-preset" data-color1="#ff0844" data-color2="#ffb199" style="background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);" title="Pink Flamingo"></button>
+                                <button class="gradient-preset" data-color1="#d53369" data-color2="#daae51" style="background: linear-gradient(135deg, #d53369 0%, #daae51 100%);" title="Rose Gold"></button>
+                                <button class="gradient-preset" data-color1="#de6161" data-color2="#2657eb" style="background: linear-gradient(135deg, #de6161 0%, #2657eb 100%);" title="Red Blue"></button>
+
+                                <!-- Magentas & Fuchsias -->
+                                <button class="gradient-preset" data-color1="#ff00cc" data-color2="#333399" style="background: linear-gradient(135deg, #ff00cc 0%, #333399 100%);" title="Magenta Night"></button>
+                                <button class="gradient-preset" data-color1="#ec008c" data-color2="#fc6767" style="background: linear-gradient(135deg, #ec008c 0%, #fc6767 100%);" title="Fuchsia"></button>
+                                <button class="gradient-preset" data-color1="#dd2476" data-color2="#ff512f" style="background: linear-gradient(135deg, #dd2476 0%, #ff512f 100%);" title="Hot Magenta"></button>
+                                <button class="gradient-preset" data-color1="#f85032" data-color2="#e73827" style="background: linear-gradient(135deg, #f85032 0%, #e73827 100%);" title="Red Love"></button>
+                                <button class="gradient-preset" data-color1="#ff5858" data-color2="#f09819" style="background: linear-gradient(135deg, #ff5858 0%, #f09819 100%);" title="Red to Orange"></button>
+
+                                <!-- Neutrals & Grays -->
+                                <button class="gradient-preset" data-color1="#000000" data-color2="#434343" style="background: linear-gradient(135deg, #000000 0%, #434343 100%);" title="Black to Gray"></button>
+                                <button class="gradient-preset" data-color1="#3C3B3F" data-color2="#605C3C" style="background: linear-gradient(135deg, #3C3B3F 0%, #605C3C 100%);" title="Army"></button>
+                                <button class="gradient-preset" data-color1="#1f1c2c" data-color2="#928DAB" style="background: linear-gradient(135deg, #1f1c2c 0%, #928DAB 100%);" title="Dark Gray"></button>
+                                <button class="gradient-preset" data-color1="#333333" data-color2="#dd1818" style="background: linear-gradient(135deg, #333333 0%, #dd1818 100%);" title="Ash to Red"></button>
+                                <button class="gradient-preset" data-color1="#29323c" data-color2="#485563" style="background: linear-gradient(135deg, #29323c 0%, #485563 100%);" title="Metallic"></button>
+                                <button class="gradient-preset" data-color1="#000428" data-color2="#004e92" style="background: linear-gradient(135deg, #000428 0%, #004e92 100%);" title="Dark Night"></button>
+
+                                <!-- Browns & Earth Tones -->
+                                <button class="gradient-preset" data-color1="#ad5389" data-color2="#3c1053" style="background: linear-gradient(135deg, #ad5389 0%, #3c1053 100%);" title="Eggplant"></button>
+                                <button class="gradient-preset" data-color1="#7F7FD5" data-color2="#91EAE4" style="background: linear-gradient(135deg, #7F7FD5 0%, #91EAE4 100%);" title="Cosmic Fusion"></button>
+                                <button class="gradient-preset" data-color1="#457fca" data-color2="#5691c8" style="background: linear-gradient(135deg, #457fca 0%, #5691c8 100%);" title="Sea Blue"></button>
+                                <button class="gradient-preset" data-color1="#4b6cb7" data-color2="#182848" style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);" title="Navy Blue"></button>
+
+                                <!-- Multi-color Spectrums -->
+                                <button class="gradient-preset" data-color1="#f953c6" data-color2="#b91d73" style="background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);" title="Pink Glow"></button>
+                                <button class="gradient-preset" data-color1="#ee0979" data-color2="#ff6a00" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);" title="Ibiza Sunset"></button>
+                                <button class="gradient-preset" data-color1="#8360c3" data-color2="#2ebf91" style="background: linear-gradient(135deg, #8360c3 0%, #2ebf91 100%);" title="Purple to Green"></button>
+                                <button class="gradient-preset" data-color1="#2F80ED" data-color2="#56CCF2" style="background: linear-gradient(135deg, #2F80ED 0%, #56CCF2 100%);" title="Sky Blue"></button>
+                                <button class="gradient-preset" data-color1="#fe8c00" data-color2="#f83600" style="background: linear-gradient(135deg, #fe8c00 0%, #f83600 100%);" title="Orange Fire"></button>
+                                <button class="gradient-preset" data-color1="#0fd850" data-color2="#f9f047" style="background: linear-gradient(135deg, #0fd850 0%, #f9f047 100%);" title="Neon Lime"></button>
+                                <button class="gradient-preset" data-color1="#00C9FF" data-color2="#92FE9D" style="background: linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%);" title="Aqua Marine"></button>
+                                <button class="gradient-preset" data-color1="#f12711" data-color2="#f5af19" style="background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);" title="Fire to Sun"></button>
+                                <button class="gradient-preset" data-color1="#c21500" data-color2="#ffc500" style="background: linear-gradient(135deg, #c21500 0%, #ffc500 100%);" title="Bright Red Gold"></button>
+                                <button class="gradient-preset" data-color1="#de6262" data-color2="#ffb88c" style="background: linear-gradient(135deg, #de6262 0%, #ffb88c 100%);" title="Peach Cream"></button>
+
+                                <!-- Pastels -->
+                                <button class="gradient-preset" data-color1="#fbc2eb" data-color2="#a6c1ee" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);" title="Pastel Rainbow"></button>
+                                <button class="gradient-preset" data-color1="#fdcbf1" data-color2="#e6dee9" style="background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%);" title="Soft Pink"></button>
+                                <button class="gradient-preset" data-color1="#ffafbd" data-color2="#ffc3a0" style="background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);" title="Peach Pastel"></button>
+                                <button class="gradient-preset" data-color1="#d299c2" data-color2="#fef9d7" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);" title="Vanilla Ice"></button>
+                                <button class="gradient-preset" data-color1="#eea2a2" data-color2="#bbc1bf" style="background: linear-gradient(135deg, #eea2a2 0%, #bbc1bf 100%);" title="Rose Mint"></button>
+                                <button class="gradient-preset" data-color1="#ffecd2" data-color2="#fcb69f" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);" title="Peach Cream"></button>
+                                <button class="gradient-preset" data-color1="#a1c4fd" data-color2="#c2e9fb" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);" title="Baby Blue"></button>
+                                <button class="gradient-preset" data-color1="#cfd9df" data-color2="#e2ebf0" style="background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%);" title="Cloud"></button>
+                                <button class="gradient-preset" data-color1="#ffeaa7" data-color2="#fdcb6e" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);" title="Soft Yellow"></button>
+                                <button class="gradient-preset" data-color1="#74ebd5" data-color2="#ACB6E5" style="background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);" title="Mint to Blue"></button>
+
+                                <!-- Tropical & Vibrant -->
+                                <button class="gradient-preset" data-color1="#FA8BFF" data-color2="#2BD2FF" style="background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 100%);" title="Miami Dolphin"></button>
+                                <button class="gradient-preset" data-color1="#ff6a00" data-color2="#ee0979" style="background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);" title="Tropical Sunset"></button>
+                                <button class="gradient-preset" data-color1="#36D1DC" data-color2="#5B86E5" style="background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);" title="Joomla"></button>
+                                <button class="gradient-preset" data-color1="#f857a6" data-color2="#ff5858" style="background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);" title="Bright Red"></button>
+                                <button class="gradient-preset" data-color1="#3EECAC" data-color2="#EE74E1" style="background: linear-gradient(135deg, #3EECAC 0%, #EE74E1 100%);" title="Rainbow Burst"></button>
+                                <button class="gradient-preset" data-color1="#00d2ff" data-color2="#928DAB" style="background: linear-gradient(135deg, #00d2ff 0%, #928DAB 100%);" title="Frost"></button>
+                                <button class="gradient-preset" data-color1="#834d9b" data-color2="#d04ed6" style="background: linear-gradient(135deg, #834d9b 0%, #d04ed6 100%);" title="Vanusa"></button>
+                                <button class="gradient-preset" data-color1="#4CA1AF" data-color2="#C4E0E5" style="background: linear-gradient(135deg, #4CA1AF 0%, #C4E0E5 100%);" title="Pacific Dream"></button>
                             </div>
                         </div>
 
@@ -121,8 +242,8 @@
                                 Padding
                                 <button class="reset-btn" onclick="resetPadding()">Reset</button>
                             </label>
-                            <input type="range" id="paddingSlider" min="0" max="100" value="40" class="slider">
-                            <div class="slider-value"><span id="paddingValue">40</span>px</div>
+                            <input type="range" id="paddingSlider" min="0" max="100" value="0" class="slider">
+                            <div class="slider-value"><span id="paddingValue">0</span>px</div>
                         </div>
 
                         <!-- Mockups Section -->

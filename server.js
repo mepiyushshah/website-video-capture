@@ -280,7 +280,7 @@ app.post('/api/render', async (req, res) => {
         const outputPath = path.join(__dirname, 'captures', outputFilename);
 
         // Render video with background and mockup
-        await renderVideoWithBackground(inputPath, outputPath, background, padding || 40, mockup || 'none');
+        await renderVideoWithBackground(inputPath, outputPath, background, padding || 0, mockup || 'none');
 
         res.json({
             success: true,
@@ -295,7 +295,7 @@ app.post('/api/render', async (req, res) => {
     }
 });
 
-async function renderVideoWithBackground(inputPath, outputPath, background, padding = 40, mockup = 'none') {
+async function renderVideoWithBackground(inputPath, outputPath, background, padding = 0, mockup = 'none') {
     return new Promise((resolve, reject) => {
         console.log('🎬 Starting FFmpeg render...', { background, padding, mockup });
 
