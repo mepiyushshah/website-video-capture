@@ -607,12 +607,15 @@ function showLoadingState(websiteUrl) {
         captureBtn.style.transform = 'none';
         captureBtn.innerHTML = `
             <div style="
-                background: hsl(240 10% 3.9%);
-                border: 1px solid hsl(240 3.7% 15.9%);
-                border-radius: 12px;
-                padding: 24px;
-                width: 500px;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                backdrop-filter: blur(40px) saturate(180%);
+                -webkit-backdrop-filter: blur(40px) saturate(180%);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                border-radius: 20px;
+                padding: 32px;
+                width: 520px;
                 max-width: 90vw;
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
             ">
                 <!-- Header -->
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">

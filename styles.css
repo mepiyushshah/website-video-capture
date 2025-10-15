@@ -1757,8 +1757,7 @@ h3 sup {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(12px);
+    background: #1e1e1e;
     display: none;
     align-items: center;
     justify-content: center;
@@ -1766,46 +1765,10 @@ h3 sup {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.modal::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
-    background-size: 100% 100%, 100% 100%, 100% 100%, 200px 200px;
-    background-repeat: no-repeat, no-repeat, no-repeat, repeat;
-    animation: etherealFloat 8s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes etherealFloat {
-    0%, 100% { 
-        transform: translateY(0px) rotate(0deg);
-        opacity: 0.3;
-    }
-    25% { 
-        transform: translateY(-10px) rotate(0.5deg);
-        opacity: 0.4;
-    }
-    50% { 
-        transform: translateY(-5px) rotate(-0.3deg);
-        opacity: 0.5;
-    }
-    75% { 
-        transform: translateY(-15px) rotate(0.2deg);
-        opacity: 0.4;
-    }
-}
 
 .modal-content {
-    background: #252526;
-    border: 1px solid #3d3d3d;
+    background: #1a1a1a;
+    border: 1px solid #2d2d2d;
     border-radius: 16px;
     width: 90%;
     max-width: 500px;
@@ -1830,8 +1793,8 @@ h3 sup {
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px;
-    background: linear-gradient(to bottom, #353535, #2d2d2d);
-    border-bottom: 1px solid #3d3d3d;
+    background: linear-gradient(to bottom, #252526, #1e1e1e);
+    border-bottom: 1px solid #2d2d2d;
 }
 
 .modal-header h3 {
@@ -1913,8 +1876,8 @@ h3 sup {
     gap: 12px;
     justify-content: flex-end;
     padding: 20px 28px;
-    background: linear-gradient(to top, #252526, #2d2d2d);
-    border-top: 1px solid #3d3d3d;
+    background: linear-gradient(to top, #1a1a1a, #1e1e1e);
+    border-top: 1px solid #2d2d2d;
 }
 
 /* Login Modal Specific Styles */
