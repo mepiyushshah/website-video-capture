@@ -509,26 +509,7 @@
                             <source src="captures/website-capture.mp4" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
-                        <!-- Timeline Section -->
-                        <div class="video-timeline" id="videoTimeline">
-                            <div class="timeline-container">
-                                <button class="timeline-play-btn" id="playPauseControl">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <div class="timeline-track" id="timelineTrack">
-                                    <div class="timeline-progress" id="timelineProgress"></div>
-                                    <div class="timeline-marker" id="timelineMarker"></div>
-                                </div>
-                                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
-                                <button class="timeline-icon-btn" id="volumeControl">
-                                    <i class="fas fa-volume-up"></i>
-                                </button>
-                                <button class="timeline-icon-btn" id="fullscreenControl">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
+
                         <!-- Video Overlay for when no video is loaded -->
                         <div class="video-placeholder" id="videoPlaceholder">
                             <div class="placeholder-content">
@@ -541,7 +522,27 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Timeline Section - Outside video wrapper -->
+                    <div class="video-timeline" id="videoTimeline">
+                        <div class="timeline-container">
+                            <button class="timeline-play-btn" id="playPauseControl">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="timeline-track" id="timelineTrack">
+                                <div class="timeline-progress" id="timelineProgress"></div>
+                                <div class="timeline-marker" id="timelineMarker"></div>
+                            </div>
+                            <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                            <button class="timeline-icon-btn" id="volumeControl">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <button class="timeline-icon-btn" id="fullscreenControl">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

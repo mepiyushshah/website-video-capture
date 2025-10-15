@@ -204,6 +204,12 @@ function loadVideo(fileName) {
             videoHeaderControls.style.display = 'flex';
         }
 
+        // Show timeline controls
+        const videoTimeline = document.getElementById('videoTimeline');
+        if (videoTimeline) {
+            videoTimeline.classList.add('active');
+        }
+
         // Update file selection in explorer
         updateFileSelection(fileName);
 
