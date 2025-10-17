@@ -2476,6 +2476,8 @@ input[type="checkbox"] {
     z-index: 10;
     pointer-events: none;
     box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.6);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 /* Safari traffic lights (macOS style) */
@@ -2525,6 +2527,8 @@ input[type="checkbox"] {
     z-index: 10;
     pointer-events: none;
     box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.8);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 /* Chrome traffic lights (macOS version of Chrome) */
@@ -2571,6 +2575,8 @@ input[type="checkbox"] {
     top: 48px;
     height: calc(100% - 48px);
     border-radius: 0;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     object-fit: cover;
     object-position: top center;
 }
@@ -2585,6 +2591,8 @@ input[type="checkbox"] {
     top: 52px;
     height: calc(100% - 52px);
     border-radius: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
     object-fit: cover;
     object-position: top center;
 }

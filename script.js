@@ -213,9 +213,16 @@ function loadVideo(fileName) {
         // Update file selection in explorer
         updateFileSelection(fileName);
 
-        // Reset play state
-        isPlaying = false;
-        updatePlayPauseButton();
+        // Auto-play video when loaded
+        currentVideo.addEventListener('loadeddata', function autoPlayHandler() {
+            currentVideo.play().catch(err => {
+                console.log('Autoplay prevented:', err);
+            });
+            isPlaying = true;
+            updatePlayPauseButton();
+            // Remove this event listener after first use
+            currentVideo.removeEventListener('loadeddata', autoPlayHandler);
+        });
     }
 }
 
