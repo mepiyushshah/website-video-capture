@@ -261,7 +261,7 @@ app.delete('/api/videos/:filename', (req, res) => {
 
 // API endpoint to render video with background
 app.post('/api/render', async (req, res) => {
-    const { filename, background, padding, mockup } = req.body;
+    const { filename, background, padding, mockup, url } = req.body;
 
     if (!filename || !background) {
         return res.status(400).json({ error: 'Filename and background are required' });
@@ -274,14 +274,14 @@ app.post('/api/render', async (req, res) => {
             return res.status(404).json({ error: 'Video not found' });
         }
 
-        console.log(`🎨 Rendering video with background: ${filename}`, { background, padding, mockup });
+        console.log(`🎨 Rendering video with background: ${filename}`, { background, padding, mockup, url });
 
         // Generate output filename
         const outputFilename = filename.replace('.mp4', '_rendered.mp4');
         const outputPath = path.join(__dirname, 'captures', outputFilename);
 
         // Render video with background and mockup
-        await renderVideoWithBackground(inputPath, outputPath, background, padding || 0, mockup || 'none');
+        await renderVideoWithBackground(inputPath, outputPath, background, padding || 0, mockup || 'none', url);
 
         res.json({
             success: true,
@@ -297,7 +297,7 @@ app.post('/api/render', async (req, res) => {
 });
 
 // Generate browser mockup overlay image with Canvas
-async function generateMockupOverlay(width, height, mockup, padding) {
+async function generateMockupOverlay(width, height, mockup, padding, url = '') {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -332,29 +332,183 @@ async function generateMockupOverlay(width, height, mockup, padding) {
     ctx.closePath();
     ctx.fill();
 
-    // Draw traffic light buttons (circular!) - scaled up proportionally
-    const buttonSize = 18; // Increased from 12px
-    const buttonSpacing = 12; // Increased from 8px
-    const buttonStartX = mockupX + 24; // Increased from 16px
-    const buttonY = mockup === 'safari' ? mockupY + 28 + buttonSize/2 : mockupY + 26 + buttonSize/2;
+    if (mockup === 'safari') {
+        // Safari-specific elements
+        const buttonSize = 18;
+        const buttonSpacing = 12;
+        const buttonStartX = mockupX + 24;
+        const buttonY = mockupY + 28 + buttonSize/2;
 
-    // Red button
-    ctx.fillStyle = '#ff5f56';
-    ctx.beginPath();
-    ctx.arc(buttonStartX + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
-    ctx.fill();
+        // Traffic light buttons (circular)
+        ctx.fillStyle = '#ff5f56';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
 
-    // Yellow button
-    ctx.fillStyle = '#ffbd2e';
-    ctx.beginPath();
-    ctx.arc(buttonStartX + buttonSize + buttonSpacing + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
-    ctx.fill();
+        ctx.fillStyle = '#ffbd2e';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + buttonSize + buttonSpacing + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
 
-    // Green button
-    ctx.fillStyle = '#28c840';
-    ctx.beginPath();
-    ctx.arc(buttonStartX + (buttonSize + buttonSpacing) * 2 + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
-    ctx.fill();
+        ctx.fillStyle = '#28c840';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + (buttonSize + buttonSpacing) * 2 + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Calculate icon positions relative to center
+        const centerY = mockupY + mockupBarHeight / 2;
+        const iconSize = 26;
+        const iconColor = '#666';
+
+        // Tab/Sidebar button (left side, after traffic lights)
+        const tabIconX = buttonStartX + (buttonSize + buttonSpacing) * 3 + 30;
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tabIconX, centerY - 8, 12, 16);
+        ctx.strokeRect(tabIconX + 14, centerY - 8, 12, 16);
+
+        // Back arrow
+        const backArrowX = tabIconX + 45;
+        ctx.beginPath();
+        ctx.moveTo(backArrowX + 8, centerY);
+        ctx.lineTo(backArrowX, centerY - 6);
+        ctx.lineTo(backArrowX, centerY + 6);
+        ctx.closePath();
+        ctx.fillStyle = iconColor;
+        ctx.fill();
+
+        // Forward arrow
+        const forwardArrowX = backArrowX + 30;
+        ctx.beginPath();
+        ctx.moveTo(forwardArrowX, centerY);
+        ctx.lineTo(forwardArrowX + 8, centerY - 6);
+        ctx.lineTo(forwardArrowX + 8, centerY + 6);
+        ctx.closePath();
+        ctx.fillStyle = iconColor;
+        ctx.fill();
+
+        // Shield icon (privacy)
+        const shieldX = forwardArrowX + 40;
+        ctx.beginPath();
+        ctx.moveTo(shieldX, centerY - 10);
+        ctx.lineTo(shieldX + 6, centerY - 10);
+        ctx.lineTo(shieldX + 8, centerY - 8);
+        ctx.lineTo(shieldX + 8, centerY + 2);
+        ctx.quadraticCurveTo(shieldX + 8, centerY + 8, shieldX + 3, centerY + 10);
+        ctx.quadraticCurveTo(shieldX - 2, centerY + 8, shieldX - 2, centerY + 2);
+        ctx.lineTo(shieldX - 2, centerY - 8);
+        ctx.lineTo(shieldX, centerY - 10);
+        ctx.closePath();
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // URL Bar (centered)
+        const urlBarHeight = 42;
+        const urlBarY = centerY - urlBarHeight/2;
+        const urlBarPaddingX = 200; // Distance from left edge
+        const urlBarX = mockupX + urlBarPaddingX;
+        const urlBarWidth = mockupWidth - (urlBarPaddingX * 2) - 150; // Leave space for right icons
+
+        // Draw URL bar background
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.roundRect(urlBarX, urlBarY, urlBarWidth, urlBarHeight, 8);
+        ctx.fill();
+
+        // Draw URL bar border
+        ctx.strokeStyle = '#d0d0d0';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Draw URL text
+        if (url) {
+            // Clean URL for display (remove protocol)
+            let displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+            ctx.fillStyle = '#333';
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            // Measure text and truncate if needed
+            const maxWidth = urlBarWidth - 60; // Leave space for padding and refresh icon
+            let textWidth = ctx.measureText(displayUrl).width;
+
+            if (textWidth > maxWidth) {
+                while (textWidth > maxWidth && displayUrl.length > 3) {
+                    displayUrl = displayUrl.slice(0, -4) + '...';
+                    textWidth = ctx.measureText(displayUrl).width;
+                }
+            }
+
+            ctx.fillText(displayUrl, urlBarX + 15, centerY);
+        }
+
+        // Refresh button (inside URL bar, right side)
+        const refreshX = urlBarX + urlBarWidth - 30;
+        ctx.beginPath();
+        ctx.arc(refreshX, centerY, 10, 0.3 * Math.PI, 1.7 * Math.PI);
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Arrow head for refresh
+        ctx.beginPath();
+        ctx.moveTo(refreshX + 10, centerY - 4);
+        ctx.lineTo(refreshX + 7, centerY - 8);
+        ctx.lineTo(refreshX + 11, centerY - 8);
+        ctx.closePath();
+        ctx.fillStyle = iconColor;
+        ctx.fill();
+
+        // Share button (right side)
+        const shareX = mockupX + mockupWidth - 85;
+        ctx.beginPath();
+        ctx.moveTo(shareX, centerY);
+        ctx.lineTo(shareX, centerY + 8);
+        ctx.lineTo(shareX + 4, centerY + 10);
+        ctx.lineTo(shareX + 8, centerY + 8);
+        ctx.lineTo(shareX + 8, centerY);
+        ctx.lineTo(shareX + 4, centerY - 8);
+        ctx.closePath();
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Plus button (rightmost)
+        const plusX = shareX + 35;
+        ctx.beginPath();
+        ctx.moveTo(plusX - 6, centerY);
+        ctx.lineTo(plusX + 6, centerY);
+        ctx.moveTo(plusX, centerY - 6);
+        ctx.lineTo(plusX, centerY + 6);
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+    } else if (mockup === 'chrome') {
+        // Chrome-specific elements (simpler design)
+        const buttonSize = 18;
+        const buttonSpacing = 12;
+        const buttonStartX = mockupX + 24;
+        const buttonY = mockupY + 26 + buttonSize/2;
+
+        // Traffic light buttons
+        ctx.fillStyle = '#ff5f56';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffbd2e';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + buttonSize + buttonSpacing + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#28c840';
+        ctx.beginPath();
+        ctx.arc(buttonStartX + (buttonSize + buttonSpacing) * 2 + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Save to temp file
     const overlayPath = path.join(__dirname, `mockup-overlay-${mockup}-${Date.now()}.png`);
@@ -364,9 +518,9 @@ async function generateMockupOverlay(width, height, mockup, padding) {
     return overlayPath;
 }
 
-async function renderVideoWithBackground(inputPath, outputPath, background, padding = 0, mockup = 'none') {
+async function renderVideoWithBackground(inputPath, outputPath, background, padding = 0, mockup = 'none', url = '') {
     return new Promise(async (resolve, reject) => {
-        console.log('🎬 Starting FFmpeg render...', { background, padding, mockup });
+        console.log('🎬 Starting FFmpeg render...', { background, padding, mockup, url });
 
         // Get video dimensions and duration first
         const probeProcess = spawn('ffprobe', [
@@ -404,7 +558,7 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             let mockupOverlayPath = null;
             if (mockup !== 'none') {
                 console.log('🎨 Generating mockup overlay with Canvas...');
-                mockupOverlayPath = await generateMockupOverlay(outputWidth, outputHeight, mockup, effectivePadding);
+                mockupOverlayPath = await generateMockupOverlay(outputWidth, outputHeight, mockup, effectivePadding, url);
                 console.log(`✅ Mockup overlay generated: ${mockupOverlayPath}`);
             }
 

@@ -440,6 +440,9 @@ async function startCaptureProcess() {
         return;
     }
 
+    // Store the URL globally so we can use it when rendering
+    window.currentCaptureUrl = url;
+
     // Auto-generate filename from URL if not provided
     if (!filename || filename.trim() === '') {
         try {
@@ -1771,7 +1774,8 @@ async function renderVideo() {
                 filename: filename,
                 background: background,
                 padding: padding,
-                mockup: mockup
+                mockup: mockup,
+                url: window.currentCaptureUrl || ''
             })
         });
 
@@ -2012,6 +2016,16 @@ function applyMockup(mockupType) {
         mockupDiv.classList.add('chrome-mockup');
     } else if (mockupType === 'safari') {
         mockupDiv.classList.add('safari-mockup');
+
+        // Add Safari toolbar elements
+        const safariToolbar = document.createElement('div');
+        safariToolbar.className = 'safari-toolbar-elements';
+        safariToolbar.innerHTML = `
+            <div class="safari-url-bar">
+                <span class="safari-url-text">${window.currentCaptureUrl ? window.currentCaptureUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') : 'soundcloud.com'}</span>
+            </div>
+        `;
+        mockupDiv.appendChild(safariToolbar);
     }
 
     // Move video into mockup container
