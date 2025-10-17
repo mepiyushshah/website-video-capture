@@ -2448,12 +2448,63 @@ input[type="checkbox"] {
     background: transparent;
 }
 
-/* Chrome Mockup - Pixel Perfect */
+/* Safari Mockup - Authentic macOS Design */
+.safari-mockup {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.15),
+        0 24px 70px rgba(0, 0, 0, 0.55);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Safari unified toolbar with translucent glass effect */
+.safari-mockup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background: linear-gradient(to bottom, rgba(246, 246, 246, 0.98), rgba(242, 242, 242, 0.96));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Safari traffic lights (macOS style) */
+.safari-mockup::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 16px;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #ff5f57 0%, #ff5347 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0.5px 1px rgba(0, 0, 0, 0.3),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.3),
+        22px 0 0 0 #ffbd2e,
+        22px 0.5px 1px 0 rgba(0, 0, 0, 0.3),
+        44px 0 0 0 #28c940,
+        44px 0.5px 1px 0 rgba(0, 0, 0, 0.3);
+    z-index: 11;
+    pointer-events: none;
+}
+
+/* Chrome Mockup - Authentic Chrome Design */
 .chrome-mockup {
     border-radius: 10px;
     overflow: hidden;
     box-shadow:
-        0 0 0 0.5px rgba(0, 0, 0, 0.1),
+        0 0 0 0.5px rgba(0, 0, 0, 0.12),
         0 20px 60px rgba(0, 0, 0, 0.5);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
@@ -2461,73 +2512,38 @@ input[type="checkbox"] {
     will-change: transform;
 }
 
+/* Chrome toolbar with distinct Chrome styling */
 .chrome-mockup::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 40px;
-    background: #e8eaed;
-    border-bottom: 0.5px solid #c4c7cb;
+    height: 48px;
+    background: linear-gradient(to bottom, #f1f3f4 0%, #e8eaed 100%);
+    border-bottom: 1px solid #dadce0;
     z-index: 10;
     pointer-events: none;
+    box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.8);
 }
 
+/* Chrome traffic lights (macOS version of Chrome) */
 .chrome-mockup::after {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: 16px;
-    width: 12px;
-    height: 12px;
-    background: #ff5f56;
-    border-radius: 50%;
-    box-shadow:
-        20px 0 0 0 #ffbd2e,
-        40px 0 0 0 #27c93f;
-    z-index: 11;
-    pointer-events: none;
-}
-
-/* Safari Mockup - Pixel Perfect */
-.safari-mockup {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow:
-        0 0 0 0.5px rgba(0, 0, 0, 0.08),
-        0 20px 60px rgba(0, 0, 0, 0.45);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    will-change: transform;
-}
-
-.safari-mockup::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 44px;
-    background: #f5f5f7;
-    border-bottom: 0.5px solid #d1d1d6;
-    z-index: 10;
-    pointer-events: none;
-}
-
-.safari-mockup::after {
     content: '';
     position: absolute;
     top: 16px;
     left: 16px;
     width: 12px;
     height: 12px;
-    background: #ff5f57;
+    background: linear-gradient(135deg, #ff5f56 0%, #ff5347 100%);
     border-radius: 50%;
     box-shadow:
-        22px 0 0 0 #febc2e,
-        44px 0 0 0 #28c840;
+        0 0.5px 1px rgba(0, 0, 0, 0.3),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.3),
+        20px 0 0 0 #ffbd2e,
+        20px 0.5px 1px 0 rgba(0, 0, 0, 0.3),
+        40px 0 0 0 #27c93f,
+        40px 0.5px 1px 0 rgba(0, 0, 0, 0.3);
     z-index: 11;
     pointer-events: none;
 }
@@ -2552,8 +2568,8 @@ input[type="checkbox"] {
 }
 
 .video-mockup-container.chrome #mainVideo {
-    top: 40px;
-    height: calc(100% - 40px);
+    top: 48px;
+    height: calc(100% - 48px);
     border-radius: 0;
     object-fit: cover;
     object-position: top center;
@@ -2566,8 +2582,8 @@ input[type="checkbox"] {
 }
 
 .video-mockup-container.safari #mainVideo {
-    top: 44px;
-    height: calc(100% - 44px);
+    top: 52px;
+    height: calc(100% - 52px);
     border-radius: 0;
     object-fit: cover;
     object-position: top center;
