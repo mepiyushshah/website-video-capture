@@ -339,8 +339,7 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 console.log('🎨 Gradient colors:', colors);
 
                 // Create gradient using geq filter
-                let filterComplex = `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];` +
-                    `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
+                let filterComplex = `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];`;
 
                 if (mockup !== 'none') {
                     // Add mockup bar with proper sizing
@@ -353,17 +352,33 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                     const buttonStartX = mockupX + 24; // Start position from left
                     const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
                     const videoYPos = mockupBarHeight + effectivePadding;
-                    const borderRadius = 12;
+                    const borderThickness = 2; // Border around the mockup
+                    const totalMockupHeight = mockupBarHeight + videoContentHeight;
 
-                    // Draw mockup bar with rounded corners at top
+                    // Scale video to FILL the mockup width completely (accounting for borders)
+                    const innerWidth = mockupBarWidth - borderThickness * 2;
+                    filterComplex += `[0:v]scale=w=${innerWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${innerWidth}:${videoContentHeight}[scaled];`;
+
+                    // Draw complete browser window frame with borders
+                    // Top bar (title bar)
                     filterComplex += `[bg]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
 
+                    // Left border
+                    filterComplex += `[bg_with_bar]drawbox=x=${mockupX}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_left];`;
+
+                    // Right border
+                    filterComplex += `[bg_left]drawbox=x=${mockupX + mockupBarWidth - borderThickness}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_right];`;
+
+                    // Bottom border
+                    filterComplex += `[bg_right]drawbox=x=${mockupX}:y=${effectivePadding + totalMockupHeight}:w=${mockupBarWidth}:h=${borderThickness}:color=${barColor}:t=fill[bg_frame];`;
+
                     // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
-                    filterComplex += `[bg_with_bar]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
+                    filterComplex += `[bg_frame]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
                         `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
                         `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=${mockupX}:${videoYPos}[outv]`;
+                        `[bg_final][scaled]overlay=${mockupX + borderThickness}:${videoYPos}[outv]`;
                 } else {
+                    filterComplex += `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
                     filterComplex += `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
                 }
 
@@ -388,7 +403,7 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 const color = parseBackgroundColor(background);
                 console.log('🎨 Solid color:', color);
 
-                let filterComplex = `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
+                let filterComplex = '';
 
                 if (mockup !== 'none') {
                     // Add mockup bar with proper sizing
@@ -401,17 +416,33 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                     const buttonStartX = mockupX + 24; // Start position from left
                     const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
                     const videoYPos = mockupBarHeight + effectivePadding;
-                    const borderRadius = 12;
+                    const borderThickness = 2; // Border around the mockup
+                    const totalMockupHeight = mockupBarHeight + videoContentHeight;
 
-                    // Draw mockup bar with rounded corners at top
+                    // Scale video to FILL the mockup width completely (accounting for borders)
+                    const innerWidth = mockupBarWidth - borderThickness * 2;
+                    filterComplex += `[0:v]scale=w=${innerWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${innerWidth}:${videoContentHeight}[scaled];`;
+
+                    // Draw complete browser window frame with borders
+                    // Top bar (title bar)
                     filterComplex += `[1:v]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
 
+                    // Left border
+                    filterComplex += `[bg_with_bar]drawbox=x=${mockupX}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_left];`;
+
+                    // Right border
+                    filterComplex += `[bg_left]drawbox=x=${mockupX + mockupBarWidth - borderThickness}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_right];`;
+
+                    // Bottom border
+                    filterComplex += `[bg_right]drawbox=x=${mockupX}:y=${effectivePadding + totalMockupHeight}:w=${mockupBarWidth}:h=${borderThickness}:color=${barColor}:t=fill[bg_frame];`;
+
                     // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
-                    filterComplex += `[bg_with_bar]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
+                    filterComplex += `[bg_frame]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
                         `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
                         `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=${mockupX}:${videoYPos}[outv]`;
+                        `[bg_final][scaled]overlay=${mockupX + borderThickness}:${videoYPos}[outv]`;
                 } else {
+                    filterComplex += `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
                     filterComplex += `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
                 }
 
