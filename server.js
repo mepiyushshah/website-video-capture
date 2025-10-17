@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const auth = require('./auth');
+const { createCanvas } = require('canvas');
 
 const app = express();
 const PORT = 3000;
@@ -295,8 +296,76 @@ app.post('/api/render', async (req, res) => {
     }
 });
 
+// Generate browser mockup overlay image with Canvas
+async function generateMockupOverlay(width, height, mockup, padding) {
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // Clear canvas with transparency
+    ctx.clearRect(0, 0, width, height);
+
+    if (mockup === 'none') {
+        return null;
+    }
+
+    // Scale toolbar proportionally - make it visually balanced for 1080p output
+    const mockupBarHeight = mockup === 'safari' ? 80 : 75;
+    const borderRadius = mockup === 'safari' ? 18 : 15;
+    const mockupX = padding;
+    const mockupY = padding;
+    const mockupWidth = width - padding * 2;
+    const mockupHeight = height - padding * 2;
+
+    // Draw rounded rectangle for browser frame
+    const barColor = mockup === 'safari' ? '#f6f6f6' : '#e8eaed';
+
+    // Draw top bar with rounded top corners
+    ctx.fillStyle = barColor;
+    ctx.beginPath();
+    ctx.moveTo(mockupX + borderRadius, mockupY);
+    ctx.lineTo(mockupX + mockupWidth - borderRadius, mockupY);
+    ctx.quadraticCurveTo(mockupX + mockupWidth, mockupY, mockupX + mockupWidth, mockupY + borderRadius);
+    ctx.lineTo(mockupX + mockupWidth, mockupY + mockupBarHeight);
+    ctx.lineTo(mockupX, mockupY + mockupBarHeight);
+    ctx.lineTo(mockupX, mockupY + borderRadius);
+    ctx.quadraticCurveTo(mockupX, mockupY, mockupX + borderRadius, mockupY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Draw traffic light buttons (circular!) - scaled up proportionally
+    const buttonSize = 18; // Increased from 12px
+    const buttonSpacing = 12; // Increased from 8px
+    const buttonStartX = mockupX + 24; // Increased from 16px
+    const buttonY = mockup === 'safari' ? mockupY + 28 + buttonSize/2 : mockupY + 26 + buttonSize/2;
+
+    // Red button
+    ctx.fillStyle = '#ff5f56';
+    ctx.beginPath();
+    ctx.arc(buttonStartX + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Yellow button
+    ctx.fillStyle = '#ffbd2e';
+    ctx.beginPath();
+    ctx.arc(buttonStartX + buttonSize + buttonSpacing + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Green button
+    ctx.fillStyle = '#28c840';
+    ctx.beginPath();
+    ctx.arc(buttonStartX + (buttonSize + buttonSpacing) * 2 + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Save to temp file
+    const overlayPath = path.join(__dirname, `mockup-overlay-${mockup}-${Date.now()}.png`);
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(overlayPath, buffer);
+
+    return overlayPath;
+}
+
 async function renderVideoWithBackground(inputPath, outputPath, background, padding = 0, mockup = 'none') {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         console.log('🎬 Starting FFmpeg render...', { background, padding, mockup });
 
         // Get video dimensions and duration first
@@ -313,7 +382,7 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             probeOutput += data.toString();
         });
 
-        probeProcess.on('close', (code) => {
+        probeProcess.on('close', async (code) => {
             if (code !== 0) {
                 reject(new Error('Failed to probe video'));
                 return;
@@ -326,10 +395,18 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             const outputWidth = 1920;
             const outputHeight = 1080;
 
-            // Calculate mockup bar height (scaled up for visibility)
-            const mockupBarHeight = mockup === 'chrome' ? 64 : mockup === 'safari' ? 70 : 0;
+            // Calculate mockup bar height - scaled for 1080p (80px for Safari, 75px for Chrome)
+            const mockupBarHeight = mockup === 'safari' ? 80 : mockup === 'chrome' ? 75 : 0;
             const effectivePadding = mockup !== 'none' ? padding : padding;
             const videoContentHeight = mockup !== 'none' ? outputHeight - mockupBarHeight - effectivePadding * 2 : outputHeight - effectivePadding * 2;
+
+            // Generate mockup overlay PNG if needed
+            let mockupOverlayPath = null;
+            if (mockup !== 'none') {
+                console.log('🎨 Generating mockup overlay with Canvas...');
+                mockupOverlayPath = await generateMockupOverlay(outputWidth, outputHeight, mockup, effectivePadding);
+                console.log(`✅ Mockup overlay generated: ${mockupOverlayPath}`);
+            }
 
             let ffmpegArgs = [];
 
@@ -341,63 +418,58 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
                 // Create gradient using geq filter
                 let filterComplex = `[1:v][2:v]blend=all_expr='A*(1-Y/${outputHeight})+B*(Y/${outputHeight})'[bg];`;
 
-                if (mockup !== 'none') {
-                    // Add mockup bar with proper sizing
-                    const mockupX = effectivePadding;
+                if (mockup !== 'none' && mockupOverlayPath) {
                     const mockupBarWidth = outputWidth - effectivePadding * 2;
-                    const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
-                    const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
-                    const buttonSize = 20; // Larger buttons
-                    const buttonSpacing = 28; // Space between buttons
-                    const buttonStartX = mockupX + 24; // Start position from left
-                    const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
                     const videoYPos = mockupBarHeight + effectivePadding;
-                    const borderThickness = 2; // Border around the mockup
-                    const totalMockupHeight = mockupBarHeight + videoContentHeight;
 
-                    // Scale video to FILL the mockup width completely (accounting for borders)
-                    const innerWidth = mockupBarWidth - borderThickness * 2;
-                    filterComplex += `[0:v]scale=w=${innerWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${innerWidth}:${videoContentHeight}[scaled];`;
+                    // Scale video to fill the mockup width completely
+                    filterComplex += `[0:v]scale=w=${mockupBarWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${mockupBarWidth}:${videoContentHeight}[scaled];`;
 
-                    // Draw complete browser window frame with borders
-                    // Top bar (title bar)
-                    filterComplex += `[bg]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+                    // Overlay video on background
+                    filterComplex += `[bg][scaled]overlay=${effectivePadding}:${videoYPos}[bg_with_video];`;
 
-                    // Left border
-                    filterComplex += `[bg_with_bar]drawbox=x=${mockupX}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_left];`;
+                    // Overlay mockup PNG on top
+                    filterComplex += `[bg_with_video][3:v]overlay=0:0[outv]`;
 
-                    // Right border
-                    filterComplex += `[bg_left]drawbox=x=${mockupX + mockupBarWidth - borderThickness}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_right];`;
-
-                    // Bottom border
-                    filterComplex += `[bg_right]drawbox=x=${mockupX}:y=${effectivePadding + totalMockupHeight}:w=${mockupBarWidth}:h=${borderThickness}:color=${barColor}:t=fill[bg_frame];`;
-
-                    // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
-                    filterComplex += `[bg_frame]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
-                        `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
-                        `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=${mockupX + borderThickness}:${videoYPos}[outv]`;
+                    ffmpegArgs = [
+                        '-i', inputPath,
+                        '-f', 'lavfi', '-i', `color=c=${colors[0]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-f', 'lavfi', '-i', `color=c=${colors[1]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-loop', '1', '-i', mockupOverlayPath,
+                        '-filter_complex',
+                        filterComplex,
+                        '-map', '[outv]',
+                        '-map', '0:a?',
+                        '-shortest',
+                        '-c:v', 'libx264',
+                        '-preset', 'medium',
+                        '-crf', '23',
+                        '-pix_fmt', 'yuv420p',
+                        '-movflags', '+faststart',
+                        '-y',
+                        outputPath
+                    ];
                 } else {
                     filterComplex += `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
                     filterComplex += `[bg][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
-                }
 
-                ffmpegArgs = [
-                    '-i', inputPath,
-                    '-f', 'lavfi', '-i', `color=c=${colors[0]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
-                    '-f', 'lavfi', '-i', `color=c=${colors[1]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
-                    '-filter_complex',
-                    filterComplex,
-                    '-map', '[outv]',
-                    '-map', '0:a?',
-                    '-c:v', 'libx264',
-                    '-preset', 'medium',
-                    '-crf', '23',
-                    '-pix_fmt', 'yuv420p',
-                    '-movflags', '+faststart',
-                    '-y',
-                    outputPath
-                ];
+                    ffmpegArgs = [
+                        '-i', inputPath,
+                        '-f', 'lavfi', '-i', `color=c=${colors[0]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-f', 'lavfi', '-i', `color=c=${colors[1]}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-filter_complex',
+                        filterComplex,
+                        '-map', '[outv]',
+                        '-map', '0:a?',
+                        '-c:v', 'libx264',
+                        '-preset', 'medium',
+                        '-crf', '23',
+                        '-pix_fmt', 'yuv420p',
+                        '-movflags', '+faststart',
+                        '-y',
+                        outputPath
+                    ];
+                }
             } else {
                 // Solid color background
                 const color = parseBackgroundColor(background);
@@ -405,62 +477,56 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
 
                 let filterComplex = '';
 
-                if (mockup !== 'none') {
-                    // Add mockup bar with proper sizing
-                    const mockupX = effectivePadding;
+                if (mockup !== 'none' && mockupOverlayPath) {
                     const mockupBarWidth = outputWidth - effectivePadding * 2;
-                    const barColor = mockup === 'chrome' ? '0xe8eaed' : '0xf6f6f6';
-                    const buttonColor = mockup === 'chrome' ? '0x27c93f' : '0x28c840';
-                    const buttonSize = 20; // Larger buttons
-                    const buttonSpacing = 28; // Space between buttons
-                    const buttonStartX = mockupX + 24; // Start position from left
-                    const buttonY = mockup === 'chrome' ? effectivePadding + 22 : effectivePadding + 25;
                     const videoYPos = mockupBarHeight + effectivePadding;
-                    const borderThickness = 2; // Border around the mockup
-                    const totalMockupHeight = mockupBarHeight + videoContentHeight;
 
-                    // Scale video to FILL the mockup width completely (accounting for borders)
-                    const innerWidth = mockupBarWidth - borderThickness * 2;
-                    filterComplex += `[0:v]scale=w=${innerWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${innerWidth}:${videoContentHeight}[scaled];`;
+                    // Scale video to fill the mockup width completely
+                    filterComplex += `[0:v]scale=w=${mockupBarWidth}:h=${videoContentHeight}:force_original_aspect_ratio=increase,crop=${mockupBarWidth}:${videoContentHeight}[scaled];`;
 
-                    // Draw complete browser window frame with borders
-                    // Top bar (title bar)
-                    filterComplex += `[1:v]drawbox=x=${mockupX}:y=${effectivePadding}:w=${mockupBarWidth}:h=${mockupBarHeight}:color=${barColor}:t=fill[bg_with_bar];`;
+                    // Overlay video on background
+                    filterComplex += `[1:v][scaled]overlay=${effectivePadding}:${videoYPos}[bg_with_video];`;
 
-                    // Left border
-                    filterComplex += `[bg_with_bar]drawbox=x=${mockupX}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_left];`;
+                    // Overlay mockup PNG on top
+                    filterComplex += `[bg_with_video][2:v]overlay=0:0[outv]`;
 
-                    // Right border
-                    filterComplex += `[bg_left]drawbox=x=${mockupX + mockupBarWidth - borderThickness}:y=${effectivePadding + mockupBarHeight}:w=${borderThickness}:h=${videoContentHeight}:color=${barColor}:t=fill[bg_right];`;
-
-                    // Bottom border
-                    filterComplex += `[bg_right]drawbox=x=${mockupX}:y=${effectivePadding + totalMockupHeight}:w=${mockupBarWidth}:h=${borderThickness}:color=${barColor}:t=fill[bg_frame];`;
-
-                    // Add traffic lights (close, minimize, maximize buttons) - larger and properly spaced
-                    filterComplex += `[bg_frame]drawbox=x=${buttonStartX}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xff5f56:t=fill,` +
-                        `drawbox=x=${buttonStartX + buttonSpacing}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=0xffbd2e:t=fill,` +
-                        `drawbox=x=${buttonStartX + buttonSpacing * 2}:y=${buttonY}:w=${buttonSize}:h=${buttonSize}:color=${buttonColor}:t=fill[bg_final];` +
-                        `[bg_final][scaled]overlay=${mockupX + borderThickness}:${videoYPos}[outv]`;
+                    ffmpegArgs = [
+                        '-i', inputPath,
+                        '-f', 'lavfi', '-i', `color=c=${color}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-loop', '1', '-i', mockupOverlayPath,
+                        '-filter_complex',
+                        filterComplex,
+                        '-map', '[outv]',
+                        '-map', '0:a?',
+                        '-shortest',
+                        '-c:v', 'libx264',
+                        '-preset', 'medium',
+                        '-crf', '23',
+                        '-pix_fmt', 'yuv420p',
+                        '-movflags', '+faststart',
+                        '-y',
+                        outputPath
+                    ];
                 } else {
                     filterComplex += `[0:v]scale=w=${outputWidth-padding*2}:h=${videoContentHeight}:force_original_aspect_ratio=decrease[scaled];`;
                     filterComplex += `[1:v][scaled]overlay=(W-w)/2:(H-h)/2[outv]`;
-                }
 
-                ffmpegArgs = [
-                    '-i', inputPath,
-                    '-f', 'lavfi', '-i', `color=c=${color}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
-                    '-filter_complex',
-                    filterComplex,
-                    '-map', '[outv]',
-                    '-map', '0:a?',
-                    '-c:v', 'libx264',
-                    '-preset', 'medium',
-                    '-crf', '23',
-                    '-pix_fmt', 'yuv420p',
-                    '-movflags', '+faststart',
-                    '-y',
-                    outputPath
-                ];
+                    ffmpegArgs = [
+                        '-i', inputPath,
+                        '-f', 'lavfi', '-i', `color=c=${color}:s=${outputWidth}x${outputHeight}:d=${duration || 10}`,
+                        '-filter_complex',
+                        filterComplex,
+                        '-map', '[outv]',
+                        '-map', '0:a?',
+                        '-c:v', 'libx264',
+                        '-preset', 'medium',
+                        '-crf', '23',
+                        '-pix_fmt', 'yuv420p',
+                        '-movflags', '+faststart',
+                        '-y',
+                        outputPath
+                    ];
+                }
             }
 
             console.log('🎨 FFmpeg command:', 'ffmpeg', ffmpegArgs.join(' '));
@@ -474,6 +540,12 @@ async function renderVideoWithBackground(inputPath, outputPath, background, padd
             });
 
             ffmpegProcess.on('close', (code) => {
+                // Cleanup temp mockup overlay
+                if (mockupOverlayPath && fs.existsSync(mockupOverlayPath)) {
+                    fs.unlinkSync(mockupOverlayPath);
+                    console.log(`🗑️ Cleaned up mockup overlay: ${mockupOverlayPath}`);
+                }
+
                 if (code === 0) {
                     console.log('✅ Video rendered successfully!');
                     resolve();
