@@ -355,53 +355,88 @@ async function generateMockupOverlay(width, height, mockup, padding, url = '') {
         ctx.arc(buttonStartX + (buttonSize + buttonSpacing) * 2 + buttonSize/2, buttonY, buttonSize/2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Calculate icon positions relative to center
+        // Icon settings - scaled properly for 1920x1080 export
         const centerY = mockupY + mockupBarHeight / 2;
-        const iconSize = 26;
-        const iconColor = '#666';
+        const scaleFactor = mockupBarHeight / 52; // Scale based on toolbar height (80px export vs 52px preview)
+        const iconSize = Math.round(18 * scaleFactor); // Scale icons proportionally (~28px for 1080p)
+        const iconGap = Math.round(14 * scaleFactor); // Scale gaps proportionally (~21px for 1080p)
+        const iconColor = '#666666';
+        const iconOpacity = 0.85;
 
-        // Tab/Sidebar button (left side, after traffic lights)
-        const tabIconX = buttonStartX + (buttonSize + buttonSpacing) * 3 + 30;
-        ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(tabIconX, centerY - 8, 12, 16);
-        ctx.strokeRect(tabIconX + 14, centerY - 8, 12, 16);
-
-        // Back arrow
-        const backArrowX = tabIconX + 45;
-        ctx.beginPath();
-        ctx.moveTo(backArrowX + 8, centerY);
-        ctx.lineTo(backArrowX, centerY - 6);
-        ctx.lineTo(backArrowX, centerY + 6);
-        ctx.closePath();
+        ctx.globalAlpha = iconOpacity;
         ctx.fillStyle = iconColor;
-        ctx.fill();
-
-        // Forward arrow
-        const forwardArrowX = backArrowX + 30;
-        ctx.beginPath();
-        ctx.moveTo(forwardArrowX, centerY);
-        ctx.lineTo(forwardArrowX + 8, centerY - 6);
-        ctx.lineTo(forwardArrowX + 8, centerY + 6);
-        ctx.closePath();
-        ctx.fillStyle = iconColor;
-        ctx.fill();
-
-        // Shield icon (privacy)
-        const shieldX = forwardArrowX + 40;
-        ctx.beginPath();
-        ctx.moveTo(shieldX, centerY - 10);
-        ctx.lineTo(shieldX + 6, centerY - 10);
-        ctx.lineTo(shieldX + 8, centerY - 8);
-        ctx.lineTo(shieldX + 8, centerY + 2);
-        ctx.quadraticCurveTo(shieldX + 8, centerY + 8, shieldX + 3, centerY + 10);
-        ctx.quadraticCurveTo(shieldX - 2, centerY + 8, shieldX - 2, centerY + 2);
-        ctx.lineTo(shieldX - 2, centerY - 8);
-        ctx.lineTo(shieldX, centerY - 10);
-        ctx.closePath();
         ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 1.5;
+
+        // Starting position for icons (after traffic lights)
+        let iconX = buttonStartX + (buttonSize + buttonSpacing) * 3 + Math.round(30 * scaleFactor);
+
+        // 1. Squares2X2Icon (Heroicon) - Sidebar/Tabs
+        const squareSize = Math.round(4 * scaleFactor);
+        const squareGap = Math.round(2 * scaleFactor);
+        const squareStartX = iconX;
+        const squareStartY = centerY - iconSize/2;
+
+        // Top-left square
+        ctx.fillRect(squareStartX, squareStartY, squareSize, squareSize);
+        // Top-right square
+        ctx.fillRect(squareStartX + squareSize + squareGap, squareStartY, squareSize, squareSize);
+        // Bottom-left square
+        ctx.fillRect(squareStartX, squareStartY + squareSize + squareGap, squareSize, squareSize);
+        // Bottom-right square
+        ctx.fillRect(squareStartX + squareSize + squareGap, squareStartY + squareSize + squareGap, squareSize, squareSize);
+
+        iconX += iconSize + iconGap;
+
+        // 2. ChevronLeftIcon (Heroicon) - Back arrow
+        ctx.lineWidth = Math.round(2 * scaleFactor);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(iconX + Math.round(10 * scaleFactor), centerY - Math.round(6 * scaleFactor));
+        ctx.lineTo(iconX + Math.round(4 * scaleFactor), centerY);
+        ctx.lineTo(iconX + Math.round(10 * scaleFactor), centerY + Math.round(6 * scaleFactor));
         ctx.stroke();
+
+        iconX += iconSize + iconGap;
+
+        // 3. ChevronRightIcon (Heroicon) - Forward arrow
+        ctx.beginPath();
+        ctx.moveTo(iconX + Math.round(4 * scaleFactor), centerY - Math.round(6 * scaleFactor));
+        ctx.lineTo(iconX + Math.round(10 * scaleFactor), centerY);
+        ctx.lineTo(iconX + Math.round(4 * scaleFactor), centerY + Math.round(6 * scaleFactor));
+        ctx.stroke();
+
+        iconX += iconSize + iconGap;
+
+        // 4. ShieldCheckIcon (Heroicon) - Privacy shield with checkmark
+        const shieldX = iconX + Math.round(7 * scaleFactor);
+        const shieldY = centerY;
+        const shieldHeight = Math.round(8 * scaleFactor);
+        const shieldWidth = Math.round(5 * scaleFactor);
+
+        // Shield outline
+        ctx.lineWidth = Math.round(1.5 * scaleFactor);
+        ctx.beginPath();
+        ctx.moveTo(shieldX, shieldY - shieldHeight);
+        ctx.lineTo(shieldX + Math.round(4 * scaleFactor), shieldY - shieldHeight);
+        ctx.quadraticCurveTo(shieldX + shieldWidth, shieldY - Math.round(7 * scaleFactor), shieldX + shieldWidth, shieldY - Math.round(6 * scaleFactor));
+        ctx.lineTo(shieldX + shieldWidth, shieldY + Math.round(2 * scaleFactor));
+        ctx.quadraticCurveTo(shieldX + shieldWidth, shieldY + Math.round(6 * scaleFactor), shieldX + Math.round(2.5 * scaleFactor), shieldY + shieldHeight);
+        ctx.quadraticCurveTo(shieldX, shieldY + Math.round(6 * scaleFactor), shieldX - scaleFactor, shieldY + Math.round(2 * scaleFactor));
+        ctx.lineTo(shieldX - scaleFactor, shieldY - Math.round(6 * scaleFactor));
+        ctx.quadraticCurveTo(shieldX - scaleFactor, shieldY - Math.round(7 * scaleFactor), shieldX, shieldY - shieldHeight);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Checkmark inside shield
+        ctx.lineWidth = Math.round(1.2 * scaleFactor);
+        ctx.beginPath();
+        ctx.moveTo(shieldX - scaleFactor, shieldY);
+        ctx.lineTo(shieldX + scaleFactor, shieldY + Math.round(2 * scaleFactor));
+        ctx.lineTo(shieldX + Math.round(4 * scaleFactor), shieldY - Math.round(2 * scaleFactor));
+        ctx.stroke();
+
+        iconX += iconSize + iconGap;
 
         // URL Bar (centered)
         const urlBarHeight = 42;
@@ -445,46 +480,105 @@ async function generateMockupOverlay(width, height, mockup, padding, url = '') {
             ctx.fillText(displayUrl, urlBarX + 15, centerY);
         }
 
-        // Refresh button (inside URL bar, right side)
-        const refreshX = urlBarX + urlBarWidth - 30;
-        ctx.beginPath();
-        ctx.arc(refreshX, centerY, 10, 0.3 * Math.PI, 1.7 * Math.PI);
+        // Reset globalAlpha for URL bar content
+        ctx.globalAlpha = 1.0;
+
+        // 5. ArrowPathIcon (Heroicon) - Refresh button (inside URL bar, right side)
+        const refreshX = urlBarX + urlBarWidth - Math.round(24 * scaleFactor);
+        const refreshIconSize = Math.round(16 * scaleFactor);
+
+        ctx.globalAlpha = 0.75;
         ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        // Arrow head for refresh
+        ctx.lineWidth = Math.round(1.8 * scaleFactor);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Top circular arrow
         ctx.beginPath();
-        ctx.moveTo(refreshX + 10, centerY - 4);
-        ctx.lineTo(refreshX + 7, centerY - 8);
-        ctx.lineTo(refreshX + 11, centerY - 8);
+        ctx.arc(refreshX + Math.round(8 * scaleFactor), centerY, Math.round(5 * scaleFactor), 0.7 * Math.PI, 0.3 * Math.PI, false);
+        ctx.stroke();
+
+        // Arrow head (top)
+        ctx.beginPath();
+        ctx.moveTo(refreshX + Math.round(12 * scaleFactor), centerY - Math.round(5 * scaleFactor));
+        ctx.lineTo(refreshX + Math.round(13 * scaleFactor), centerY - Math.round(3 * scaleFactor));
+        ctx.lineTo(refreshX + Math.round(11 * scaleFactor), centerY - Math.round(3 * scaleFactor));
         ctx.closePath();
         ctx.fillStyle = iconColor;
         ctx.fill();
 
-        // Share button (right side)
-        const shareX = mockupX + mockupWidth - 85;
+        // Bottom circular arrow
         ctx.beginPath();
-        ctx.moveTo(shareX, centerY);
-        ctx.lineTo(shareX, centerY + 8);
-        ctx.lineTo(shareX + 4, centerY + 10);
-        ctx.lineTo(shareX + 8, centerY + 8);
-        ctx.lineTo(shareX + 8, centerY);
-        ctx.lineTo(shareX + 4, centerY - 8);
-        ctx.closePath();
-        ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 2;
+        ctx.arc(refreshX + Math.round(8 * scaleFactor), centerY, Math.round(5 * scaleFactor), 1.3 * Math.PI, 1.7 * Math.PI, false);
         ctx.stroke();
 
-        // Plus button (rightmost)
-        const plusX = shareX + 35;
+        // Arrow head (bottom)
         ctx.beginPath();
-        ctx.moveTo(plusX - 6, centerY);
-        ctx.lineTo(plusX + 6, centerY);
-        ctx.moveTo(plusX, centerY - 6);
-        ctx.lineTo(plusX, centerY + 6);
-        ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 2.5;
+        ctx.moveTo(refreshX + Math.round(4 * scaleFactor), centerY + Math.round(5 * scaleFactor));
+        ctx.lineTo(refreshX + Math.round(3 * scaleFactor), centerY + Math.round(3 * scaleFactor));
+        ctx.lineTo(refreshX + Math.round(5 * scaleFactor), centerY + Math.round(3 * scaleFactor));
+        ctx.closePath();
+        ctx.fill();
+
+        // Reset context for right icons
+        ctx.globalAlpha = iconOpacity;
+
+        // Calculate right icons starting position
+        const rightIconsX = mockupX + mockupWidth - Math.round(70 * scaleFactor);
+
+        // 6. ArrowUpTrayIcon (Heroicon) - Share button
+        const shareX = rightIconsX;
+        const shareY = centerY;
+
+        ctx.lineWidth = Math.round(1.8 * scaleFactor);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Upward arrow
+        ctx.beginPath();
+        ctx.moveTo(shareX + Math.round(9 * scaleFactor), shareY - Math.round(6 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(9 * scaleFactor), shareY + Math.round(4 * scaleFactor));
         ctx.stroke();
+
+        // Arrow head
+        ctx.beginPath();
+        ctx.moveTo(shareX + Math.round(6 * scaleFactor), shareY - Math.round(3 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(9 * scaleFactor), shareY - Math.round(6 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(12 * scaleFactor), shareY - Math.round(3 * scaleFactor));
+        ctx.stroke();
+
+        // Tray base
+        ctx.lineWidth = Math.round(1.5 * scaleFactor);
+        ctx.beginPath();
+        ctx.moveTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(4 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(6 * scaleFactor));
+        ctx.quadraticCurveTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(8 * scaleFactor), shareX + Math.round(6 * scaleFactor), shareY + Math.round(8 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(12 * scaleFactor), shareY + Math.round(8 * scaleFactor));
+        ctx.quadraticCurveTo(shareX + Math.round(14 * scaleFactor), shareY + Math.round(8 * scaleFactor), shareX + Math.round(14 * scaleFactor), shareY + Math.round(6 * scaleFactor));
+        ctx.lineTo(shareX + Math.round(14 * scaleFactor), shareY + Math.round(4 * scaleFactor));
+        ctx.stroke();
+
+        // 7. PlusIcon (Heroicon) - Plus button (rightmost)
+        const plusX = rightIconsX + iconSize + iconGap;
+        const plusY = centerY;
+
+        ctx.lineWidth = Math.round(2 * scaleFactor);
+        ctx.lineCap = 'round';
+
+        // Horizontal line
+        ctx.beginPath();
+        ctx.moveTo(plusX + Math.round(4 * scaleFactor), plusY);
+        ctx.lineTo(plusX + Math.round(14 * scaleFactor), plusY);
+        ctx.stroke();
+
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(plusX + Math.round(9 * scaleFactor), plusY - Math.round(5 * scaleFactor));
+        ctx.lineTo(plusX + Math.round(9 * scaleFactor), plusY + Math.round(5 * scaleFactor));
+        ctx.stroke();
+
+        // Reset globalAlpha
+        ctx.globalAlpha = 1.0;
 
     } else if (mockup === 'chrome') {
         // Chrome-specific elements (simpler design)
