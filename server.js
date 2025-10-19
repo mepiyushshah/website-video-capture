@@ -370,90 +370,138 @@ async function generateMockupOverlay(width, height, mockup, padding, url = '') {
         // Starting position for icons (after traffic lights)
         let iconX = buttonStartX + (buttonSize + buttonSpacing) * 3 + Math.round(30 * scaleFactor);
 
-        // 1. Squares2X2Icon (Heroicon) - Sidebar/Tabs
-        const squareSize = Math.round(4 * scaleFactor);
-        const squareGap = Math.round(2 * scaleFactor);
-        const squareStartX = iconX;
-        const squareStartY = centerY - iconSize/2;
+        // 1. Squares2X2Icon (Heroicon) - Sidebar/Tabs - pixel-perfect recreation
+        const gridSize = iconSize * 0.35; // Each square is 35% of icon size
+        const gridGap = iconSize * 0.12; // Gap is 12% of icon size
+        const gridStartX = iconX + (iconSize - gridSize * 2 - gridGap) / 2;
+        const gridStartY = centerY - (gridSize * 2 + gridGap) / 2;
+
+        // Draw 2x2 grid with rounded corners
+        const cornerRadius = gridSize * 0.25;
 
         // Top-left square
-        ctx.fillRect(squareStartX, squareStartY, squareSize, squareSize);
+        ctx.beginPath();
+        ctx.roundRect(gridStartX, gridStartY, gridSize, gridSize, cornerRadius);
+        ctx.fill();
+
         // Top-right square
-        ctx.fillRect(squareStartX + squareSize + squareGap, squareStartY, squareSize, squareSize);
+        ctx.beginPath();
+        ctx.roundRect(gridStartX + gridSize + gridGap, gridStartY, gridSize, gridSize, cornerRadius);
+        ctx.fill();
+
         // Bottom-left square
-        ctx.fillRect(squareStartX, squareStartY + squareSize + squareGap, squareSize, squareSize);
+        ctx.beginPath();
+        ctx.roundRect(gridStartX, gridStartY + gridSize + gridGap, gridSize, gridSize, cornerRadius);
+        ctx.fill();
+
         // Bottom-right square
-        ctx.fillRect(squareStartX + squareSize + squareGap, squareStartY + squareSize + squareGap, squareSize, squareSize);
+        ctx.beginPath();
+        ctx.roundRect(gridStartX + gridSize + gridGap, gridStartY + gridSize + gridGap, gridSize, gridSize, cornerRadius);
+        ctx.fill();
 
         iconX += iconSize + iconGap;
 
         // 2. ChevronLeftIcon (Heroicon) - Back arrow
-        ctx.lineWidth = Math.round(2 * scaleFactor);
+        ctx.lineWidth = Math.round(2.2 * scaleFactor);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.beginPath();
-        ctx.moveTo(iconX + Math.round(10 * scaleFactor), centerY - Math.round(6 * scaleFactor));
-        ctx.lineTo(iconX + Math.round(4 * scaleFactor), centerY);
-        ctx.lineTo(iconX + Math.round(10 * scaleFactor), centerY + Math.round(6 * scaleFactor));
+        ctx.moveTo(iconX + iconSize * 0.6, centerY - iconSize * 0.35);
+        ctx.lineTo(iconX + iconSize * 0.25, centerY);
+        ctx.lineTo(iconX + iconSize * 0.6, centerY + iconSize * 0.35);
         ctx.stroke();
 
         iconX += iconSize + iconGap;
 
         // 3. ChevronRightIcon (Heroicon) - Forward arrow
         ctx.beginPath();
-        ctx.moveTo(iconX + Math.round(4 * scaleFactor), centerY - Math.round(6 * scaleFactor));
-        ctx.lineTo(iconX + Math.round(10 * scaleFactor), centerY);
-        ctx.lineTo(iconX + Math.round(4 * scaleFactor), centerY + Math.round(6 * scaleFactor));
+        ctx.moveTo(iconX + iconSize * 0.4, centerY - iconSize * 0.35);
+        ctx.lineTo(iconX + iconSize * 0.75, centerY);
+        ctx.lineTo(iconX + iconSize * 0.4, centerY + iconSize * 0.35);
         ctx.stroke();
 
         iconX += iconSize + iconGap;
 
-        // 4. ShieldCheckIcon (Heroicon) - Privacy shield with checkmark
-        const shieldX = iconX + Math.round(7 * scaleFactor);
-        const shieldY = centerY;
-        const shieldHeight = Math.round(8 * scaleFactor);
-        const shieldWidth = Math.round(5 * scaleFactor);
+        // 4. ShieldCheckIcon (Heroicon) - Privacy shield with checkmark - pixel-perfect
+        const shieldCenterX = iconX + iconSize / 2;
+        const shieldCenterY = centerY;
+        const shieldHeight = iconSize * 0.85;
+        const shieldWidth = iconSize * 0.7;
 
-        // Shield outline
-        ctx.lineWidth = Math.round(1.5 * scaleFactor);
+        ctx.lineWidth = Math.round(1.8 * scaleFactor);
+        ctx.fillStyle = iconColor;
+
+        // Draw filled shield shape
         ctx.beginPath();
-        ctx.moveTo(shieldX, shieldY - shieldHeight);
-        ctx.lineTo(shieldX + Math.round(4 * scaleFactor), shieldY - shieldHeight);
-        ctx.quadraticCurveTo(shieldX + shieldWidth, shieldY - Math.round(7 * scaleFactor), shieldX + shieldWidth, shieldY - Math.round(6 * scaleFactor));
-        ctx.lineTo(shieldX + shieldWidth, shieldY + Math.round(2 * scaleFactor));
-        ctx.quadraticCurveTo(shieldX + shieldWidth, shieldY + Math.round(6 * scaleFactor), shieldX + Math.round(2.5 * scaleFactor), shieldY + shieldHeight);
-        ctx.quadraticCurveTo(shieldX, shieldY + Math.round(6 * scaleFactor), shieldX - scaleFactor, shieldY + Math.round(2 * scaleFactor));
-        ctx.lineTo(shieldX - scaleFactor, shieldY - Math.round(6 * scaleFactor));
-        ctx.quadraticCurveTo(shieldX - scaleFactor, shieldY - Math.round(7 * scaleFactor), shieldX, shieldY - shieldHeight);
+        ctx.moveTo(shieldCenterX, shieldCenterY - shieldHeight / 2);
+        ctx.lineTo(shieldCenterX + shieldWidth / 2, shieldCenterY - shieldHeight / 2);
+        ctx.quadraticCurveTo(
+            shieldCenterX + shieldWidth / 2,
+            shieldCenterY - shieldHeight / 3,
+            shieldCenterX + shieldWidth / 2,
+            shieldCenterY
+        );
+        ctx.quadraticCurveTo(
+            shieldCenterX + shieldWidth / 2,
+            shieldCenterY + shieldHeight / 3,
+            shieldCenterX,
+            shieldCenterY + shieldHeight / 2
+        );
+        ctx.quadraticCurveTo(
+            shieldCenterX - shieldWidth / 2,
+            shieldCenterY + shieldHeight / 3,
+            shieldCenterX - shieldWidth / 2,
+            shieldCenterY
+        );
+        ctx.quadraticCurveTo(
+            shieldCenterX - shieldWidth / 2,
+            shieldCenterY - shieldHeight / 3,
+            shieldCenterX - shieldWidth / 2,
+            shieldCenterY - shieldHeight / 2
+        );
+        ctx.lineTo(shieldCenterX, shieldCenterY - shieldHeight / 2);
         ctx.closePath();
-        ctx.stroke();
-
-        // Checkmark inside shield
-        ctx.lineWidth = Math.round(1.2 * scaleFactor);
-        ctx.beginPath();
-        ctx.moveTo(shieldX - scaleFactor, shieldY);
-        ctx.lineTo(shieldX + scaleFactor, shieldY + Math.round(2 * scaleFactor));
-        ctx.lineTo(shieldX + Math.round(4 * scaleFactor), shieldY - Math.round(2 * scaleFactor));
-        ctx.stroke();
-
-        iconX += iconSize + iconGap;
-
-        // URL Bar (centered)
-        const urlBarHeight = 42;
-        const urlBarY = centerY - urlBarHeight/2;
-        const urlBarPaddingX = 200; // Distance from left edge
-        const urlBarX = mockupX + urlBarPaddingX;
-        const urlBarWidth = mockupWidth - (urlBarPaddingX * 2) - 150; // Leave space for right icons
-
-        // Draw URL bar background
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.roundRect(urlBarX, urlBarY, urlBarWidth, urlBarHeight, 8);
         ctx.fill();
 
-        // Draw URL bar border
-        ctx.strokeStyle = '#d0d0d0';
-        ctx.lineWidth = 1;
+        // Draw checkmark on white background
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.round(1.5 * scaleFactor);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(shieldCenterX - shieldWidth * 0.2, shieldCenterY);
+        ctx.lineTo(shieldCenterX - shieldWidth * 0.05, shieldCenterY + shieldHeight * 0.15);
+        ctx.lineTo(shieldCenterX + shieldWidth * 0.25, shieldCenterY - shieldHeight * 0.15);
+        ctx.stroke();
+
+        // Reset color for next icons
+        ctx.strokeStyle = iconColor;
+
+        iconX += iconSize + iconGap;
+
+        // URL Bar (centered) - CSS-matched with scaling
+        const urlBarHeight = Math.round(28 * scaleFactor); // CSS: height 28px
+        const urlBarY = centerY - urlBarHeight/2;
+        const urlBarMargin = Math.round(20 * scaleFactor); // CSS: margin 0 20px
+        const urlBarMaxWidth = Math.round(600 * scaleFactor); // CSS: max-width 600px
+        const urlBarPadding = Math.round(12 * scaleFactor); // CSS: padding 0 12px
+
+        // Calculate URL bar position (after left icons, before right icons)
+        const rightIconsWidth = Math.round((iconSize * 2 + iconGap) * 1.5); // Space for 2 right icons
+        const urlBarX = iconX + iconSize + urlBarMargin; // After last left icon + margin
+        const availableWidth = mockupWidth - (urlBarX - mockupX) - rightIconsWidth - urlBarMargin;
+        const urlBarWidth = Math.min(urlBarMaxWidth, availableWidth);
+
+        // Draw URL bar background
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.roundRect(urlBarX, urlBarY, urlBarWidth, urlBarHeight, Math.round(6 * scaleFactor)); // CSS: border-radius 6px
+        ctx.fill();
+
+        // Draw URL bar border - CSS: border 0.5px solid rgba(0, 0, 0, 0.12)
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.lineWidth = Math.round(0.5 * scaleFactor);
         ctx.stroke();
 
         // Draw URL text
@@ -461,120 +509,135 @@ async function generateMockupOverlay(width, height, mockup, padding, url = '') {
             // Clean URL for display (remove protocol)
             let displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-            ctx.fillStyle = '#333';
-            ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial';
+            ctx.fillStyle = '#333'; // CSS: color #333
+            ctx.font = `${Math.round(13 * scaleFactor)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial`; // CSS: font-size 13px
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
 
             // Measure text and truncate if needed
-            const maxWidth = urlBarWidth - 60; // Leave space for padding and refresh icon
+            const maxTextWidth = urlBarWidth - urlBarPadding * 2 - Math.round(20 * scaleFactor); // Leave space for refresh icon
             let textWidth = ctx.measureText(displayUrl).width;
 
-            if (textWidth > maxWidth) {
-                while (textWidth > maxWidth && displayUrl.length > 3) {
+            if (textWidth > maxTextWidth) {
+                while (textWidth > maxTextWidth && displayUrl.length > 3) {
                     displayUrl = displayUrl.slice(0, -4) + '...';
                     textWidth = ctx.measureText(displayUrl).width;
                 }
             }
 
-            ctx.fillText(displayUrl, urlBarX + 15, centerY);
+            ctx.fillText(displayUrl, urlBarX + urlBarPadding, centerY);
         }
 
         // Reset globalAlpha for URL bar content
         ctx.globalAlpha = 1.0;
 
-        // 5. ArrowPathIcon (Heroicon) - Refresh button (inside URL bar, right side)
-        const refreshX = urlBarX + urlBarWidth - Math.round(24 * scaleFactor);
-        const refreshIconSize = Math.round(16 * scaleFactor);
+        // 5. ArrowPathIcon (Heroicon) - Refresh button (inside URL bar, right side) - CSS-matched with scaling
+        const refreshIconSize = Math.round(16 * scaleFactor); // CSS: width/height 16px
+        const refreshX = urlBarX + urlBarWidth - refreshIconSize - urlBarPadding;
+        const refreshCenterX = refreshX + refreshIconSize / 2;
 
-        ctx.globalAlpha = 0.75;
-        ctx.strokeStyle = iconColor;
+        ctx.globalAlpha = 0.75; // CSS: opacity 0.75
+        ctx.strokeStyle = iconColor; // CSS: color #666666
         ctx.lineWidth = Math.round(1.8 * scaleFactor);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         // Top circular arrow
         ctx.beginPath();
-        ctx.arc(refreshX + Math.round(8 * scaleFactor), centerY, Math.round(5 * scaleFactor), 0.7 * Math.PI, 0.3 * Math.PI, false);
+        ctx.arc(refreshCenterX, centerY, refreshIconSize * 0.35, 0.7 * Math.PI, 0.3 * Math.PI, false);
         ctx.stroke();
 
-        // Arrow head (top)
-        ctx.beginPath();
-        ctx.moveTo(refreshX + Math.round(12 * scaleFactor), centerY - Math.round(5 * scaleFactor));
-        ctx.lineTo(refreshX + Math.round(13 * scaleFactor), centerY - Math.round(3 * scaleFactor));
-        ctx.lineTo(refreshX + Math.round(11 * scaleFactor), centerY - Math.round(3 * scaleFactor));
-        ctx.closePath();
+        // Arrow head (top right)
         ctx.fillStyle = iconColor;
+        ctx.beginPath();
+        ctx.moveTo(refreshCenterX + refreshIconSize * 0.3, centerY - refreshIconSize * 0.35);
+        ctx.lineTo(refreshCenterX + refreshIconSize * 0.35, centerY - refreshIconSize * 0.2);
+        ctx.lineTo(refreshCenterX + refreshIconSize * 0.2, centerY - refreshIconSize * 0.2);
+        ctx.closePath();
         ctx.fill();
 
         // Bottom circular arrow
         ctx.beginPath();
-        ctx.arc(refreshX + Math.round(8 * scaleFactor), centerY, Math.round(5 * scaleFactor), 1.3 * Math.PI, 1.7 * Math.PI, false);
+        ctx.arc(refreshCenterX, centerY, refreshIconSize * 0.35, 1.3 * Math.PI, 1.7 * Math.PI, false);
         ctx.stroke();
 
-        // Arrow head (bottom)
+        // Arrow head (bottom left)
         ctx.beginPath();
-        ctx.moveTo(refreshX + Math.round(4 * scaleFactor), centerY + Math.round(5 * scaleFactor));
-        ctx.lineTo(refreshX + Math.round(3 * scaleFactor), centerY + Math.round(3 * scaleFactor));
-        ctx.lineTo(refreshX + Math.round(5 * scaleFactor), centerY + Math.round(3 * scaleFactor));
+        ctx.moveTo(refreshCenterX - refreshIconSize * 0.3, centerY + refreshIconSize * 0.35);
+        ctx.lineTo(refreshCenterX - refreshIconSize * 0.35, centerY + refreshIconSize * 0.2);
+        ctx.lineTo(refreshCenterX - refreshIconSize * 0.2, centerY + refreshIconSize * 0.2);
         ctx.closePath();
         ctx.fill();
 
         // Reset context for right icons
-        ctx.globalAlpha = iconOpacity;
+        ctx.globalAlpha = iconOpacity; // CSS: opacity 0.85
+        ctx.fillStyle = iconColor;
+        ctx.strokeStyle = iconColor;
 
-        // Calculate right icons starting position
-        const rightIconsX = mockupX + mockupWidth - Math.round(70 * scaleFactor);
+        // Calculate right icons starting position - CSS-matched with scaling
+        // Right icons: Share + Plus with 14px gap, positioned from right edge with 16px padding
+        const rightPadding = Math.round(16 * scaleFactor); // CSS: padding 0 16px
+        const rightIconsX = mockupX + mockupWidth - rightPadding - (iconSize * 2 + iconGap);
 
         // 6. ArrowUpTrayIcon (Heroicon) - Share button
         const shareX = rightIconsX;
-        const shareY = centerY;
+        const shareCenterX = shareX + iconSize / 2;
 
         ctx.lineWidth = Math.round(1.8 * scaleFactor);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Upward arrow
+        // Upward arrow shaft
         ctx.beginPath();
-        ctx.moveTo(shareX + Math.round(9 * scaleFactor), shareY - Math.round(6 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(9 * scaleFactor), shareY + Math.round(4 * scaleFactor));
+        ctx.moveTo(shareCenterX, centerY - iconSize * 0.35);
+        ctx.lineTo(shareCenterX, centerY + iconSize * 0.2);
         ctx.stroke();
 
         // Arrow head
         ctx.beginPath();
-        ctx.moveTo(shareX + Math.round(6 * scaleFactor), shareY - Math.round(3 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(9 * scaleFactor), shareY - Math.round(6 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(12 * scaleFactor), shareY - Math.round(3 * scaleFactor));
+        ctx.moveTo(shareCenterX - iconSize * 0.2, centerY - iconSize * 0.15);
+        ctx.lineTo(shareCenterX, centerY - iconSize * 0.35);
+        ctx.lineTo(shareCenterX + iconSize * 0.2, centerY - iconSize * 0.15);
         ctx.stroke();
 
         // Tray base
         ctx.lineWidth = Math.round(1.5 * scaleFactor);
         ctx.beginPath();
-        ctx.moveTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(4 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(6 * scaleFactor));
-        ctx.quadraticCurveTo(shareX + Math.round(4 * scaleFactor), shareY + Math.round(8 * scaleFactor), shareX + Math.round(6 * scaleFactor), shareY + Math.round(8 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(12 * scaleFactor), shareY + Math.round(8 * scaleFactor));
-        ctx.quadraticCurveTo(shareX + Math.round(14 * scaleFactor), shareY + Math.round(8 * scaleFactor), shareX + Math.round(14 * scaleFactor), shareY + Math.round(6 * scaleFactor));
-        ctx.lineTo(shareX + Math.round(14 * scaleFactor), shareY + Math.round(4 * scaleFactor));
+        ctx.moveTo(shareCenterX - iconSize * 0.3, centerY + iconSize * 0.2);
+        ctx.lineTo(shareCenterX - iconSize * 0.3, centerY + iconSize * 0.3);
+        ctx.quadraticCurveTo(
+            shareCenterX - iconSize * 0.3,
+            centerY + iconSize * 0.4,
+            shareCenterX - iconSize * 0.2,
+            centerY + iconSize * 0.4
+        );
+        ctx.lineTo(shareCenterX + iconSize * 0.2, centerY + iconSize * 0.4);
+        ctx.quadraticCurveTo(
+            shareCenterX + iconSize * 0.3,
+            centerY + iconSize * 0.4,
+            shareCenterX + iconSize * 0.3,
+            centerY + iconSize * 0.3
+        );
+        ctx.lineTo(shareCenterX + iconSize * 0.3, centerY + iconSize * 0.2);
         ctx.stroke();
 
         // 7. PlusIcon (Heroicon) - Plus button (rightmost)
         const plusX = rightIconsX + iconSize + iconGap;
-        const plusY = centerY;
+        const plusCenterX = plusX + iconSize / 2;
 
         ctx.lineWidth = Math.round(2 * scaleFactor);
         ctx.lineCap = 'round';
 
         // Horizontal line
         ctx.beginPath();
-        ctx.moveTo(plusX + Math.round(4 * scaleFactor), plusY);
-        ctx.lineTo(plusX + Math.round(14 * scaleFactor), plusY);
+        ctx.moveTo(plusCenterX - iconSize * 0.3, centerY);
+        ctx.lineTo(plusCenterX + iconSize * 0.3, centerY);
         ctx.stroke();
 
         // Vertical line
         ctx.beginPath();
-        ctx.moveTo(plusX + Math.round(9 * scaleFactor), plusY - Math.round(5 * scaleFactor));
-        ctx.lineTo(plusX + Math.round(9 * scaleFactor), plusY + Math.round(5 * scaleFactor));
+        ctx.moveTo(plusCenterX, centerY - iconSize * 0.3);
+        ctx.lineTo(plusCenterX, centerY + iconSize * 0.3);
         ctx.stroke();
 
         // Reset globalAlpha
