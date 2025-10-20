@@ -1570,9 +1570,19 @@ function initializeVideoEditor() {
                 if (bgColorPicker) {
                     bgColorPicker.value = colorValue;
                 }
+                // Update preview
+                updateColorPreview(colorValue);
             }
             applySolidBackground();
         });
+    }
+
+    // Function to update color preview (defined early for both inputs)
+    function updateColorPreview(color) {
+        const preview = document.getElementById('bgColorPreview');
+        if (preview) {
+            preview.style.background = color;
+        }
     }
 
     // Solid color input - color picker
@@ -1583,9 +1593,12 @@ function initializeVideoEditor() {
             if (bgColorInput) {
                 bgColorInput.value = colorValue;
             }
+            // Update preview
+            updateColorPreview(colorValue);
             applySolidBackground();
         });
     }
+
 
     // Gradient presets
     const gradientPresets = document.querySelectorAll('.gradient-preset');

@@ -359,11 +359,31 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         /* Hero Section */
@@ -380,12 +400,20 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
-            animation: rotate 30s linear infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(247, 37, 133, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            animation: gradientShift 15s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; transform: translateY(0); }
+            50% { opacity: 0.8; transform: translateY(-20px); }
         }
 
         @keyframes rotate {
@@ -413,7 +441,31 @@
             font-size: 0.875rem;
             font-weight: 600;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease-out;
+            animation: fadeInUp 0.6s ease-out, pulse 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        .hero-badge::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 100px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hero-badge:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
 
         @keyframes fadeInUp {
@@ -465,76 +517,6 @@
             font-size: 1.05rem;
         }
 
-        .hero-demo {
-            margin-top: 5rem;
-            position: relative;
-            animation: fadeInUp 0.8s ease-out 0.4s backwards;
-        }
-
-        .demo-video-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.1);
-            background: var(--dark-light);
-            position: relative;
-        }
-
-        .demo-video-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: var(--dark-lighter);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 1rem;
-        }
-
-        .demo-placeholder {
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, var(--dark-lighter) 0%, var(--dark-light) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .demo-placeholder::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent 30%, rgba(102, 126, 234, 0.1) 50%, transparent 70%);
-            animation: shimmer 3s infinite;
-            display: none;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%); }
-            100% { transform: translateX(100%) translateY(100%); }
-        }
-
-        .demo-placeholder i {
-            font-size: 5rem;
-            color: var(--primary);
-            opacity: 0.5;
-        }
-
-        .demo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            position: relative;
-            z-index: 2;
-            border-radius: 24px;
-        }
 
         /* Stats Section */
         .stats {
@@ -613,7 +595,7 @@
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 2.5rem;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
@@ -627,17 +609,41 @@
             height: 3px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transform: scaleX(0);
-            transition: transform 0.3s;
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
         }
 
         .feature-card:hover::before {
             transform: scaleX(1);
+        }
+
+        .feature-card:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .feature-icon {
@@ -649,6 +655,9 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
         }
 
         .feature-icon i {
@@ -662,11 +671,15 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .feature-card p {
             color: var(--text-dim);
             line-height: 1.7;
+            position: relative;
+            z-index: 1;
         }
 
         /* How It Works */
@@ -723,18 +736,43 @@
         .step-visual {
             aspect-ratio: 4/3;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.02);
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.8), rgba(26, 26, 26, 0.8));
             border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
         }
 
-        .step-visual i {
-            font-size: 4rem;
-            color: var(--primary);
-            opacity: 0.3;
+        .step-visual::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(90deg, rgba(102, 126, 234, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(102, 126, 234, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .step-visual-icon {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .step-visual-icon i {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* Pricing */
@@ -753,26 +791,51 @@
 
         .pricing-card {
             background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: 24px;
             padding: 3rem;
             position: relative;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(102, 126, 234, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
         }
 
         .pricing-card.featured {
-            background: rgba(102, 126, 234, 0.05);
-            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.08);
+            border: 2px solid var(--primary);
             transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .pricing-card.featured::before {
+            opacity: 1;
         }
 
         .pricing-card:hover {
             transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+        }
+
+        .pricing-card:hover::before {
+            opacity: 1;
         }
 
         .pricing-card.featured:hover {
             transform: scale(1.05) translateY(-10px);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.4);
         }
 
         .pricing-badge {
@@ -792,6 +855,8 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .pricing-card .price {
@@ -801,6 +866,8 @@
             display: flex;
             align-items: baseline;
             gap: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .pricing-card .price span {
@@ -817,6 +884,8 @@
         .pricing-features {
             list-style: none;
             margin: 2rem 0;
+            position: relative;
+            z-index: 1;
         }
 
         .pricing-features li {
@@ -852,21 +921,43 @@
 
         .testimonial-card {
             background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 2.5rem;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
         }
 
         .testimonial-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.15);
+        }
+
+        .testimonial-card:hover::before {
+            opacity: 1;
         }
 
         .testimonial-stars {
             color: #fbbf24;
             margin-bottom: 1.5rem;
             font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .testimonial-text {
@@ -874,12 +965,16 @@
             line-height: 1.7;
             margin-bottom: 2rem;
             color: var(--text);
+            position: relative;
+            z-index: 1;
         }
 
         .testimonial-author {
             display: flex;
             align-items: center;
             gap: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .author-avatar {
@@ -1358,13 +1453,6 @@
                     Watch Demo
                 </a>
             </div>
-            <div class="hero-demo">
-                <div class="demo-video-container">
-                    <div class="demo-placeholder">
-                        <img src="assets/images/demo-hero.png" alt="Website Capture Demo">
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -1457,7 +1545,9 @@
                     <p>Simply paste any website URL into CaptureStudio. Our intelligent system will automatically detect the page structure and prepare it for recording.</p>
                 </div>
                 <div class="step-visual">
-                    <i class="fas fa-link"></i>
+                    <div class="step-visual-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
                 </div>
             </div>
             <div class="step">
@@ -1467,7 +1557,9 @@
                     <p>Choose your settings—resolution, scroll speed, effects, and more. Then hit record and watch as we create a perfect smooth-scrolling video of the entire page.</p>
                 </div>
                 <div class="step-visual">
-                    <i class="fas fa-video"></i>
+                    <div class="step-visual-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
                 </div>
             </div>
             <div class="step">
@@ -1477,7 +1569,9 @@
                     <p>Add backgrounds, mockups, and final touches in our editor. Then export your professional video ready to share anywhere.</p>
                 </div>
                 <div class="step-visual">
-                    <i class="fas fa-share-nodes"></i>
+                    <div class="step-visual-icon">
+                        <i class="fas fa-share-nodes"></i>
+                    </div>
                 </div>
             </div>
         </div>
