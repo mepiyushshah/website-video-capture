@@ -488,40 +488,25 @@
                     <input type="text" id="outputName" placeholder="my-capture.mp4">
                 </div>
                 <div class="form-group">
-                    <label>Capture Settings</label>
-                    <div class="form-row" style="margin-bottom: 12px;">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="quickResolution">Resolution</label>
-                            <select id="quickResolution" onchange="updateQuickSettings()">
-                                <option value="1280x720">1280x720 (HD)</option>
-                                <option value="1920x1080">1920x1080 (Full HD)</option>
-                                <option value="2560x1440">2560x1440 (2K)</option>
-                                <option value="3840x2160">3840x2160 (4K)</option>
-                            </select>
+                    <label>Standard Quality Settings</label>
+                    <div class="standard-settings-display">
+                        <div class="setting-badge">
+                            <i class="fas fa-desktop"></i>
+                            <span>1920×1080 Full HD</span>
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="quickFps">Frame Rate</label>
-                            <select id="quickFps" onchange="updateQuickSettings()">
-                                <option value="24">24 FPS (Cinematic)</option>
-                                <option value="30" selected>30 FPS (Standard)</option>
-                                <option value="60">60 FPS (Smooth)</option>
-                            </select>
+                        <div class="setting-badge">
+                            <i class="fas fa-film"></i>
+                            <span>30 FPS Smooth</span>
+                        </div>
+                        <div class="setting-badge">
+                            <i class="fas fa-clock"></i>
+                            <span>15s Scroll</span>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="quickScrollDuration">Scroll Duration</label>
-                            <select id="quickScrollDuration" onchange="updateQuickSettings()">
-                                <option value="0" selected>Auto (adapts to page)</option>
-                                <option value="5">5 seconds</option>
-                                <option value="10">10 seconds</option>
-                                <option value="15">15 seconds</option>
-                                <option value="20">20 seconds</option>
-                                <option value="30">30 seconds</option>
-                                <option value="60">60 seconds</option>
-                            </select>
-                        </div>
-                    </div>
+                    <!-- Hidden inputs for standard settings -->
+                    <input type="hidden" id="quickResolution" value="1920x1080">
+                    <input type="hidden" id="quickFps" value="30">
+                    <input type="hidden" id="quickScrollDuration" value="15">
                 </div>
             </div>
             <div class="modal-footer">

@@ -2198,6 +2198,43 @@ h3 sup {
     margin-top: 4px;
 }
 
+/* Standard Settings Display */
+.standard-settings-display {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 14px;
+    background: #1a1a1a;
+    border: 1px solid #3d3d3d;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.setting-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(31, 90, 254, 0.12);
+    border: 1px solid rgba(31, 90, 254, 0.25);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.setting-badge i {
+    color: #1f5afe;
+    font-size: 12px;
+}
+
+.setting-badge:hover {
+    background: rgba(31, 90, 254, 0.18);
+    border-color: rgba(31, 90, 254, 0.35);
+    transform: translateY(-1px);
+}
+
 .effects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

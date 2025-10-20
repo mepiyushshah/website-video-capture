@@ -37,14 +37,16 @@ class WebsiteVideoCapture {
         '--disable-renderer-backgrounding',
         '--force-color-profile=srgb',
         '--high-dpi-support=1',
-        '--force-device-scale-factor=2'
+        '--force-device-scale-factor=2',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-http2'
       ]
     });
 
     const context = await this.browser.newContext({
       viewport: { width, height },
       deviceScaleFactor: 2, // High DPI for crisp video
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       recordVideo: {
         dir: this.outputDir,
         size: { width, height },
@@ -53,10 +55,40 @@ class WebsiteVideoCapture {
       // High quality settings
       colorScheme: 'light',
       reducedMotion: 'no-preference',
-      forcedColors: 'none'
+      forcedColors: 'none',
+      // Stealth settings
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
+      permissions: ['geolocation'],
+      geolocation: { longitude: -74.006, latitude: 40.7128 },
+      hasTouch: false,
+      isMobile: false,
+      javaScriptEnabled: true
     });
 
     this.page = await context.newPage();
+
+    // Hide webdriver and automation detection
+    await this.page.addInitScript(() => {
+      // Overwrite the navigator.webdriver property
+      Object.defineProperty(navigator, 'webdriver', {
+        get: () => undefined
+      });
+
+      // Mock chrome object
+      window.chrome = {
+        runtime: {}
+      };
+
+      // Mock permissions
+      const originalQuery = window.navigator.permissions.query;
+      window.navigator.permissions.query = (parameters) => (
+        parameters.name === 'notifications' ?
+          Promise.resolve({ state: Notification.permission }) :
+          originalQuery(parameters)
+      );
+    });
+
     this.settings = settings;
   }
 

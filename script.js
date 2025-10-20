@@ -2120,28 +2120,23 @@ function loadQuickSettings() {
 }
 
 function updateQuickSettings() {
-    // Get current settings from localStorage
-    const settings = JSON.parse(localStorage.getItem('videoSettings') || '{}');
+    // Use standard hardcoded settings - Full HD 30fps 15s scroll
+    const settings = {
+        resolution: '1920x1080',  // Full HD
+        fps: '30',                // Standard smooth
+        scrollDuration: 15,       // 15 seconds
+        waitTime: 5,
+        timeout: 60,
+        scrollEasing: 'ease-in-out',
+        scrollSpeed: 'medium',
+        removePopups: true,
+        pauseMedia: true
+    };
 
-    // Update with values from quick settings dropdowns
-    const resolutionSelect = document.getElementById('quickResolution');
-    const fpsSelect = document.getElementById('quickFps');
-    const scrollDurationSelect = document.getElementById('quickScrollDuration');
-
-    if (resolutionSelect) {
-        settings.resolution = resolutionSelect.value;
-    }
-    if (fpsSelect) {
-        settings.fps = fpsSelect.value;
-    }
-    if (scrollDurationSelect) {
-        settings.scrollDuration = parseInt(scrollDurationSelect.value);
-    }
-
-    // Save back to localStorage
+    // Save to localStorage
     localStorage.setItem('videoSettings', JSON.stringify(settings));
 
-    console.log('Quick settings updated:', settings);
+    console.log('Standard settings applied:', settings);
 }
 
 function openCaptureSettings() {
