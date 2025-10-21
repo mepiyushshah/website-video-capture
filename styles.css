@@ -2201,38 +2201,37 @@ h3 sup {
 /* Standard Settings Display */
 .standard-settings-display {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
-    padding: 14px;
-    background: #1a1a1a;
-    border: 1px solid #3d3d3d;
-    border-radius: 8px;
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .setting-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 14px;
-    background: rgba(31, 90, 254, 0.12);
-    border: 1px solid rgba(31, 90, 254, 0.25);
-    border-radius: 6px;
+    padding: 12px 16px;
+    background: #2a2a2a;
+    border: 1px solid #3d3d3d;
+    border-radius: 8px;
     color: #ffffff;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
     transition: all 0.2s ease;
+    cursor: default;
+    flex: 1;
+    min-width: fit-content;
+    justify-content: center;
 }
 
 .setting-badge i {
-    color: #1f5afe;
-    font-size: 12px;
+    color: #888;
+    font-size: 14px;
 }
 
 .setting-badge:hover {
-    background: rgba(31, 90, 254, 0.18);
-    border-color: rgba(31, 90, 254, 0.35);
-    transform: translateY(-1px);
+    background: #333;
+    border-color: #4a4a4a;
 }
 
 .effects-grid {
