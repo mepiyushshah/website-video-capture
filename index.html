@@ -22,6 +22,10 @@
             </div>
             
             <div class="nav-center">
+                <button class="nav-btn" onclick="handleNavTab('Subscription')">
+                    <i class="fas fa-crown"></i>
+                    <span>Subscription</span>
+                </button>
             </div>
             
             <div class="nav-right">
@@ -464,6 +468,189 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Section -->
+    <div class="subscription-container" id="subscriptionContainer" style="display: none;">
+        <div class="subscription-content">
+            <div class="subscription-header">
+                <div class="subscription-title">
+                    <i class="fas fa-crown"></i>
+                    <h2>Subscription & Billing</h2>
+                </div>
+                <p class="subscription-subtitle">Manage your subscription, billing, and usage</p>
+            </div>
+
+            <!-- Current Plan Card -->
+            <div class="subscription-card current-plan-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-star"></i> Current Plan</h3>
+                </div>
+                <div class="card-body">
+                    <div class="plan-info">
+                        <div class="plan-badge" id="currentPlanBadge">Free Plan</div>
+                        <div class="plan-details">
+                            <h4 id="currentPlanName">Starter</h4>
+                            <p class="plan-price" id="currentPlanPrice">$0<span>/month</span></p>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <h5>Your Plan Includes:</h5>
+                        <ul id="currentPlanFeatures">
+                            <li><i class="fas fa-check"></i> 5 videos per month</li>
+                            <li><i class="fas fa-check"></i> 1080p quality</li>
+                            <li><i class="fas fa-check"></i> Basic backgrounds</li>
+                            <li><i class="fas fa-check"></i> Browser mockups</li>
+                            <li><i class="fas fa-check"></i> Standard support</li>
+                        </ul>
+                    </div>
+                    <div class="plan-usage">
+                        <h5>Usage This Month:</h5>
+                        <div class="usage-bar">
+                            <div class="usage-label">
+                                <span>Videos Created</span>
+                                <span id="usageCount">0 / 5</span>
+                            </div>
+                            <div class="usage-progress">
+                                <div class="usage-fill" id="usageFill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-upgrade" onclick="showUpgradeModal()">
+                        <i class="fas fa-rocket"></i>
+                        <span>Upgrade Plan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Available Plans -->
+            <div class="subscription-card plans-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-th"></i> Available Plans</h3>
+                </div>
+                <div class="card-body">
+                    <div class="plans-grid">
+                        <!-- Starter Plan -->
+                        <div class="plan-item" data-plan="starter">
+                            <div class="plan-header">
+                                <h4>Starter</h4>
+                                <div class="plan-price-display">
+                                    <span class="price">$0</span>
+                                    <span class="period">/month</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features-list">
+                                <li><i class="fas fa-check"></i> 5 videos per month</li>
+                                <li><i class="fas fa-check"></i> 1080p quality</li>
+                                <li><i class="fas fa-check"></i> Basic backgrounds</li>
+                                <li><i class="fas fa-check"></i> Browser mockups</li>
+                                <li><i class="fas fa-check"></i> Standard support</li>
+                            </ul>
+                            <button class="btn-select-plan current-plan-btn">Current Plan</button>
+                        </div>
+
+                        <!-- Pro Plan -->
+                        <div class="plan-item featured" data-plan="pro">
+                            <div class="plan-badge-featured">Most Popular</div>
+                            <div class="plan-header">
+                                <h4>Pro</h4>
+                                <div class="plan-price-display">
+                                    <span class="price">$29</span>
+                                    <span class="period">/month</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features-list">
+                                <li><i class="fas fa-check"></i> Unlimited videos</li>
+                                <li><i class="fas fa-check"></i> 4K quality</li>
+                                <li><i class="fas fa-check"></i> Custom backgrounds</li>
+                                <li><i class="fas fa-check"></i> All mockup styles</li>
+                                <li><i class="fas fa-check"></i> Priority support</li>
+                                <li><i class="fas fa-check"></i> API access</li>
+                                <li><i class="fas fa-check"></i> No watermarks</li>
+                            </ul>
+                            <button class="btn-select-plan" onclick="selectPlan('pro')">
+                                <i class="fas fa-arrow-right"></i>
+                                Select Pro
+                            </button>
+                        </div>
+
+                        <!-- Enterprise Plan -->
+                        <div class="plan-item" data-plan="enterprise">
+                            <div class="plan-header">
+                                <h4>Enterprise</h4>
+                                <div class="plan-price-display">
+                                    <span class="price">Custom</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features-list">
+                                <li><i class="fas fa-check"></i> Everything in Pro</li>
+                                <li><i class="fas fa-check"></i> Team collaboration</li>
+                                <li><i class="fas fa-check"></i> Custom branding</li>
+                                <li><i class="fas fa-check"></i> Advanced analytics</li>
+                                <li><i class="fas fa-check"></i> Dedicated support</li>
+                                <li><i class="fas fa-check"></i> SLA guarantee</li>
+                                <li><i class="fas fa-check"></i> On-premise option</li>
+                            </ul>
+                            <button class="btn-select-plan" onclick="contactSales()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Sales
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing History -->
+            <div class="subscription-card billing-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-invoice-dollar"></i> Billing History</h3>
+                </div>
+                <div class="card-body">
+                    <div class="billing-table-container">
+                        <table class="billing-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Invoice</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billingHistory">
+                                <tr class="no-billing-history">
+                                    <td colspan="5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-receipt"></i>
+                                            <p>No billing history yet</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="subscription-card payment-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
+                </div>
+                <div class="card-body">
+                    <div class="payment-info" id="paymentInfo">
+                        <div class="empty-state">
+                            <i class="fas fa-credit-card"></i>
+                            <p>No payment method added</p>
+                            <button class="btn-secondary" onclick="addPaymentMethod()">
+                                <i class="fas fa-plus"></i>
+                                Add Payment Method
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

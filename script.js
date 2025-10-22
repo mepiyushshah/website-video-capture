@@ -296,6 +296,9 @@ function handleNavTab(tabName) {
         case 'Design':
             showDesign();
             break;
+        case 'Subscription':
+            showSubscription();
+            break;
     }
 }
 
@@ -2156,3 +2159,283 @@ function openCaptureSettings() {
 window.loadQuickSettings = loadQuickSettings;
 window.updateQuickSettings = updateQuickSettings;
 window.openCaptureSettings = openCaptureSettings;
+
+// ========================================
+// Subscription Functions
+// ========================================
+
+function showSubscription() {
+    // Hide main app container
+    const appContainer = document.querySelector('.app-container .main-content');
+    if (appContainer) {
+        appContainer.style.display = 'none';
+    }
+
+    // Show subscription container
+    const subscriptionContainer = document.getElementById('subscriptionContainer');
+    if (subscriptionContainer) {
+        subscriptionContainer.style.display = 'block';
+    }
+
+    // Load subscription data
+    loadSubscriptionData();
+}
+
+function hideSubscription() {
+    // Show main app container
+    const appContainer = document.querySelector('.app-container .main-content');
+    if (appContainer) {
+        appContainer.style.display = 'flex';
+    }
+
+    // Hide subscription container
+    const subscriptionContainer = document.getElementById('subscriptionContainer');
+    if (subscriptionContainer) {
+        subscriptionContainer.style.display = 'none';
+    }
+}
+
+async function loadSubscriptionData() {
+    try {
+        // Fetch user subscription data from backend
+        const response = await fetch('/api/subscription/current');
+        if (response.ok) {
+            const data = await response.json();
+            updateSubscriptionUI(data);
+        } else {
+            // Use default free plan
+            updateSubscriptionUI({
+                plan: 'starter',
+                planName: 'Starter',
+                price: 0,
+                features: [
+                    '5 videos per month',
+                    '1080p quality',
+                    'Basic backgrounds',
+                    'Browser mockups',
+                    'Standard support'
+                ],
+                usage: {
+                    videosCreated: 0,
+                    videosLimit: 5
+                }
+            });
+        }
+
+        // Load billing history
+        loadBillingHistory();
+    } catch (error) {
+        console.error('Error loading subscription data:', error);
+        // Use default values
+        updateSubscriptionUI({
+            plan: 'starter',
+            planName: 'Starter',
+            price: 0,
+            features: [
+                '5 videos per month',
+                '1080p quality',
+                'Basic backgrounds',
+                'Browser mockups',
+                'Standard support'
+            ],
+            usage: {
+                videosCreated: 0,
+                videosLimit: 5
+            }
+        });
+    }
+}
+
+function updateSubscriptionUI(data) {
+    // Update current plan badge
+    const planBadge = document.getElementById('currentPlanBadge');
+    if (planBadge) {
+        planBadge.textContent = data.price === 0 ? 'Free Plan' : data.planName + ' Plan';
+    }
+
+    // Update plan name
+    const planName = document.getElementById('currentPlanName');
+    if (planName) {
+        planName.textContent = data.planName;
+    }
+
+    // Update price
+    const planPrice = document.getElementById('currentPlanPrice');
+    if (planPrice) {
+        planPrice.innerHTML = `$${data.price}<span>/month</span>`;
+    }
+
+    // Update features
+    const featuresContainer = document.getElementById('currentPlanFeatures');
+    if (featuresContainer && data.features) {
+        featuresContainer.innerHTML = data.features.map(feature =>
+            `<li><i class="fas fa-check"></i> ${feature}</li>`
+        ).join('');
+    }
+
+    // Update usage
+    if (data.usage) {
+        const usageCount = document.getElementById('usageCount');
+        const usageFill = document.getElementById('usageFill');
+
+        if (usageCount) {
+            usageCount.textContent = `${data.usage.videosCreated} / ${data.usage.videosLimit}`;
+        }
+
+        if (usageFill) {
+            const percentage = (data.usage.videosCreated / data.usage.videosLimit) * 100;
+            usageFill.style.width = `${percentage}%`;
+        }
+    }
+
+    // Update plan items - mark current plan
+    document.querySelectorAll('.plan-item').forEach(item => {
+        const planType = item.getAttribute('data-plan');
+        const button = item.querySelector('.btn-select-plan');
+
+        if (planType === data.plan) {
+            button.textContent = 'Current Plan';
+            button.classList.add('current-plan-btn');
+            button.onclick = null;
+        } else {
+            button.classList.remove('current-plan-btn');
+        }
+    });
+}
+
+async function loadBillingHistory() {
+    try {
+        const response = await fetch('/api/subscription/billing-history');
+        if (response.ok) {
+            const data = await response.json();
+            updateBillingHistoryUI(data.history || []);
+        }
+    } catch (error) {
+        console.error('Error loading billing history:', error);
+    }
+}
+
+function updateBillingHistoryUI(history) {
+    const billingHistory = document.getElementById('billingHistory');
+    if (!billingHistory) return;
+
+    if (history.length === 0) {
+        billingHistory.innerHTML = `
+            <tr class="no-billing-history">
+                <td colspan="5">
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <p>No billing history yet</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    billingHistory.innerHTML = history.map(item => `
+        <tr>
+            <td>${new Date(item.date).toLocaleDateString()}</td>
+            <td>${item.description}</td>
+            <td>$${item.amount.toFixed(2)}</td>
+            <td><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
+            <td><a href="${item.invoiceUrl}" target="_blank" class="invoice-link"><i class="fas fa-download"></i> Download</a></td>
+        </tr>
+    `).join('');
+}
+
+function showUpgradeModal() {
+    // Scroll to plans section
+    const plansCard = document.querySelector('.plans-card');
+    if (plansCard) {
+        plansCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+async function selectPlan(planType) {
+    try {
+        // Show loading state
+        const button = event.target.closest('.btn-select-plan');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        button.disabled = true;
+
+        // Call backend to initiate subscription
+        const response = await fetch('/api/subscription/select-plan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plan: planType })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            if (data.checkoutUrl) {
+                // Redirect to payment page
+                window.location.href = data.checkoutUrl;
+            } else {
+                // Plan updated successfully
+                showNotification('Plan updated successfully!', 'success');
+                loadSubscriptionData();
+            }
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Failed to update plan', 'error');
+        }
+
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    } catch (error) {
+        console.error('Error selecting plan:', error);
+        showNotification('An error occurred. Please try again.', 'error');
+
+        // Restore button
+        if (button) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+}
+
+function contactSales() {
+    // Open mailto link or contact form
+    window.location.href = 'mailto:sales@capturestudio.com?subject=Enterprise Plan Inquiry';
+}
+
+function addPaymentMethod() {
+    showNotification('Payment method functionality coming soon!', 'info');
+    // TODO: Implement payment method addition (e.g., Stripe integration)
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+
+    // Add to DOM
+    document.body.appendChild(notification);
+
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Export subscription functions
+window.showSubscription = showSubscription;
+window.hideSubscription = hideSubscription;
+window.selectPlan = selectPlan;
+window.contactSales = contactSales;
+window.addPaymentMethod = addPaymentMethod;
+window.showUpgradeModal = showUpgradeModal;

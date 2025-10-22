@@ -928,6 +928,147 @@ function parseGradientColors(gradientString) {
     return ['0x1a1a1a', '0x2a2a2a'];
 }
 
+// ========================================
+// Subscription API Endpoints
+// ========================================
+
+// Get current subscription
+app.get('/api/subscription/current', requireAuth, (req, res) => {
+    try {
+        // For now, return default free plan
+        // TODO: Fetch from database based on req.user
+        const subscription = {
+            plan: 'starter',
+            planName: 'Starter',
+            price: 0,
+            features: [
+                '5 videos per month',
+                '1080p quality',
+                'Basic backgrounds',
+                'Browser mockups',
+                'Standard support'
+            ],
+            usage: {
+                videosCreated: 0,
+                videosLimit: 5
+            }
+        };
+
+        res.json(subscription);
+    } catch (error) {
+        console.error('Error fetching subscription:', error);
+        res.status(500).json({ error: 'Failed to fetch subscription' });
+    }
+});
+
+// Get billing history
+app.get('/api/subscription/billing-history', requireAuth, (req, res) => {
+    try {
+        // For now, return empty billing history
+        // TODO: Fetch from database based on req.user
+        const billingHistory = {
+            history: []
+            // Example:
+            // history: [
+            //     {
+            //         date: '2024-10-01',
+            //         description: 'Pro Plan - Monthly',
+            //         amount: 29.00,
+            //         status: 'Paid',
+            //         invoiceUrl: '/api/invoices/12345'
+            //     }
+            // ]
+        };
+
+        res.json(billingHistory);
+    } catch (error) {
+        console.error('Error fetching billing history:', error);
+        res.status(500).json({ error: 'Failed to fetch billing history' });
+    }
+});
+
+// Select a new plan
+app.post('/api/subscription/select-plan', requireAuth, async (req, res) => {
+    try {
+        const { plan } = req.body;
+
+        if (!plan) {
+            return res.status(400).json({ error: 'Plan is required' });
+        }
+
+        // Validate plan
+        const validPlans = ['starter', 'pro', 'enterprise'];
+        if (!validPlans.includes(plan)) {
+            return res.status(400).json({ error: 'Invalid plan' });
+        }
+
+        // For now, just return success
+        // TODO: Implement actual payment processing (Stripe, etc.)
+        console.log(`User ${req.user.email} selected plan: ${plan}`);
+
+        if (plan === 'starter') {
+            // Downgrade to free plan
+            res.json({
+                success: true,
+                message: 'Successfully downgraded to Starter plan'
+            });
+        } else {
+            // For paid plans, return a checkout URL (mock for now)
+            res.json({
+                success: true,
+                checkoutUrl: `/checkout?plan=${plan}`,
+                message: 'Redirecting to checkout...'
+            });
+        }
+    } catch (error) {
+        console.error('Error selecting plan:', error);
+        res.status(500).json({ error: 'Failed to update subscription' });
+    }
+});
+
+// Cancel subscription
+app.post('/api/subscription/cancel', requireAuth, async (req, res) => {
+    try {
+        // TODO: Implement subscription cancellation
+        console.log(`User ${req.user.email} cancelled subscription`);
+
+        res.json({
+            success: true,
+            message: 'Subscription cancelled successfully'
+        });
+    } catch (error) {
+        console.error('Error cancelling subscription:', error);
+        res.status(500).json({ error: 'Failed to cancel subscription' });
+    }
+});
+
+// Get payment methods
+app.get('/api/subscription/payment-methods', requireAuth, (req, res) => {
+    try {
+        // TODO: Fetch payment methods from database
+        const paymentMethods = {
+            methods: []
+            // Example:
+            // methods: [
+            //     {
+            //         id: 'pm_123',
+            //         type: 'card',
+            //         last4: '4242',
+            //         brand: 'visa',
+            //         expiryMonth: 12,
+            //         expiryYear: 2025,
+            //         isDefault: true
+            //     }
+            // ]
+        };
+
+        res.json(paymentMethods);
+    } catch (error) {
+        console.error('Error fetching payment methods:', error);
+        res.status(500).json({ error: 'Failed to fetch payment methods' });
+    }
+});
+
 // Serve the landing page (public)
 app.get('/', (req, res) => {
     // Always show homepage for testing
