@@ -1096,8 +1096,15 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
     // Add active class to selected tab and content
-    document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
-    document.getElementById(`${tabName}-tab`).classList.add('active');
+    const tabButton = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+    if (tabButton) {
+        tabButton.classList.add('active');
+    }
+    
+    const tabContent = document.getElementById(`${tabName}-tab`);
+    if (tabContent) {
+        tabContent.classList.add('active');
+    }
 }
 
 function loadCurrentSettings() {
@@ -2439,3 +2446,4 @@ window.selectPlan = selectPlan;
 window.contactSales = contactSales;
 window.addPaymentMethod = addPaymentMethod;
 window.showUpgradeModal = showUpgradeModal;
+window.handleNavTab = handleNavTab;
